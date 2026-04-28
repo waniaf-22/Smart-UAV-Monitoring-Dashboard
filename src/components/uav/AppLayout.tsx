@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, AlertTriangle, Gamepad2, FileBarChart, LogOut, Plane } from "lucide-react";
+import { LayoutDashboard, AlertTriangle, Gamepad2, FileBarChart, LogOut, Plane, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -7,6 +7,7 @@ const navItems = [
   { to: "/control", label: "Control Panel", icon: Gamepad2 },
   { to: "/alerts", label: "Wind Alert", icon: AlertTriangle },
   { to: "/reports", label: "Reports", icon: FileBarChart },
+  { to: "/profile", label: "Profile", icon: User },
 ] as const;
 
 export function AppLayout({ children }: { children: React.ReactNode }) {

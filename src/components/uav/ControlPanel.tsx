@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Play, Square, Siren, Plane, Home as HomeIcon, Camera } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Play, Square, Siren, Plane, CheckSquare, Square as SquareOutline, Camera, Home as HomeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -13,107 +14,220 @@ import { toast } from "sonner";
 
 type Status = "idle" | "running" | "landing";
 
+interface UAV {
+  id: string;
+  city: string;
+  status: Status;
+  selected: boolean;
+}
+
+const INITIAL_UAVS: UAV[] = [
+  { id: "UAV-01", city: "Islamabad", status: "idle", selected: false },
+  { id: "UAV-02", city: "Karachi", status: "idle", selected: false },
+  { id: "UAV-03", city: "Lahore", status: "idle", selected: false },
+  { id: "UAV-04", city: "Peshawar", status: "idle", selected: false },
+  { id: "UAV-05", city: "Quetta", status: "idle", selected: false },
+  { id: "UAV-06", city: "Multan", status: "idle", selected: false },
+  { id: "UAV-07", city: "Faisalabad", status: "idle", selected: false },
+  { id: "UAV-08", city: "Rawalpindi", status: "idle", selected: false },
+  { id: "UAV-09", city: "Gujranwala", status: "idle", selected: false },
+  { id: "UAV-10", city: "Sialkot", status: "idle", selected: false },
+  { id: "UAV-11", city: "Hyderabad", status: "idle", selected: false },
+  { id: "UAV-12", city: "Bahawalpur", status: "idle", selected: false },
+  { id: "UAV-13", city: "Sukkur", status: "idle", selected: false },
+  { id: "UAV-14", city: "Larkana", status: "idle", selected: false },
+];
+
+const badgeStyles = {
+  idle: { label: "Idle", color: "bg-muted text-foreground" },
+  running: { label: "In Flight", color: "bg-[oklch(var(--success))] text-primary-foreground" },
+  landing: { label: "Landing", color: "bg-destructive text-destructive-foreground" },
+};
+
 export function ControlPanel() {
-  const [status, setStatus] = useState<Status>("idle");
+  const [uavs, setUavs] = useState<UAV[]>(INITIAL_UAVS);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const start = () => {
-    setStatus("running");
-    toast.success("UAV started", { description: "Motors armed. Lifting off." });
-  };
-  const stop = () => {
-    setStatus("idle");
-    toast("UAV stopped", { description: "Motors disarmed." });
-  };
-  const emergencyLand = () => {
-    setStatus("landing");
-    setConfirmOpen(false);
-    toast.error("Emergency landing initiated", { description: "Descending immediately." });
+  // Derived state
+  const selectedUAVs = useMemo(() => uavs.filter((u) => u.selected), [uavs]);
+  const activeUAVs = useMemo(() => uavs.filter((u) => u.status === "running"), [uavs]);
+  const allSelected = selectedUAVs.length === uavs.length && uavs.length > 0;
+
+  // Actions
+  const toggleSelection = (id: string) => {
+    setUavs((prev) => prev.map((u) => (u.id === id ? { ...u, selected: !u.selected } : u)));
   };
 
-  const badge = {
-    idle: { label: "Idle", color: "bg-muted text-foreground" },
-    running: { label: "In Flight", color: "bg-[oklch(var(--success))] text-primary-foreground" },
-    landing: { label: "Emergency Landing", color: "bg-destructive text-destructive-foreground" },
-  }[status];
+  const toggleSelectAll = () => {
+    setUavs((prev) => prev.map((u) => ({ ...u, selected: !allSelected })));
+  };
+
+  const setStatusSingle = (id: string, status: Status) => {
+    setUavs((prev) => prev.map((u) => (u.id === id ? { ...u, status } : u)));
+    if (status === "running") toast.success(`${id} started`, { description: "Motors armed. Lifting off." });
+    if (status === "idle") toast(`${id} stopped`, { description: "Motors disarmed." });
+  };
+
+  const startSelected = () => {
+    const idleSelected = selectedUAVs.filter((u) => u.status === "idle");
+    if (idleSelected.length === 0) return;
+    setUavs((prev) => prev.map((u) => (u.selected && u.status === "idle" ? { ...u, status: "running" } : u)));
+    toast.success(`${idleSelected.length} UAV(s) started`, { description: "Simultaneous lift-off initiated." });
+  };
+
+  const stopSelected = () => {
+    const activeSelected = selectedUAVs.filter((u) => u.status !== "idle");
+    if (activeSelected.length === 0) return;
+    setUavs((prev) => prev.map((u) => (u.selected && u.status !== "idle" ? { ...u, status: "idle" } : u)));
+    toast(`${activeSelected.length} UAV(s) stopped`, { description: "Motors disarmed." });
+  };
+
+  const emergencyLandSelected = () => {
+    setUavs((prev) => prev.map((u) => (u.selected ? { ...u, status: "landing" } : u)));
+    setConfirmOpen(false);
+    toast.error("Emergency landing initiated", { description: "Selected UAVs descending immediately." });
+  };
 
   return (
     <div className="p-6 space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground">Control Panel</h1>
-        <p className="text-sm text-muted-foreground">Direct command interface for UAV-07.</p>
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground">Fleet Control</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Manage {uavs.length} assigned UAVs across major cities. Active: {activeUAVs.length}
+        </p>
       </header>
 
-      <div className="bg-card border border-border rounded-2xl p-6 flex items-center justify-between">
+      {/* Bulk Action Bar */}
+      <div className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-6 z-10 shadow-lg">
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-xl flex items-center justify-center" style={{ background: "var(--gradient-primary)" }}>
-            <Plane className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Current Status</p>
-            <p className="text-xl font-bold text-foreground">UAV-07</p>
-          </div>
+          <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-foreground">
+            <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} />
+            Select All
+          </label>
+          <span className="text-sm text-muted-foreground border-l border-border pl-4">
+            {selectedUAVs.length} Selected
+          </span>
         </div>
-        <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider ${badge.color}`}>
-          {badge.label}
-        </span>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Button
-          onClick={start}
-          disabled={status === "running"}
-          className="h-32 text-lg font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl flex flex-col gap-2"
-          style={{ boxShadow: "var(--shadow-glow)" }}
-        >
-          <Play className="h-8 w-8" />
-          Start UAV
-        </Button>
-        <Button
-          onClick={stop}
-          disabled={status === "idle"}
-          variant="outline"
-          className="h-32 text-lg font-bold border-2 border-border bg-secondary text-foreground hover:bg-secondary/70 hover:border-primary rounded-2xl flex flex-col gap-2"
-        >
-          <Square className="h-8 w-8" />
-          Stop UAV
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <Button variant="outline" className="h-14 border-border bg-secondary text-foreground hover:bg-secondary/70">
-          <HomeIcon className="h-4 w-4 mr-2" /> Return Home
-        </Button>
-        <Button variant="outline" className="h-14 border-border bg-secondary text-foreground hover:bg-secondary/70">
-          <Camera className="h-4 w-4 mr-2" /> Capture
-        </Button>
-        <Button variant="outline" className="h-14 border-border bg-secondary text-foreground hover:bg-secondary/70">
-          <Plane className="h-4 w-4 mr-2" /> Auto Hover
-        </Button>
-      </div>
-
-      <div
-        className="rounded-2xl p-6 border-2"
-        style={{
-          borderColor: "oklch(0.62 0.24 25)",
-          background: "linear-gradient(180deg, oklch(0.3 0.12 25) 0%, oklch(0.22 0.06 25) 100%)",
-        }}
-      >
-        <div className="flex items-start gap-3 mb-4">
-          <Siren className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-          <div>
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Emergency Controls</h3>
-            <p className="text-xs text-muted-foreground mt-1">Use only in critical situations. Requires confirmation.</p>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            onClick={startSelected}
+            disabled={selectedUAVs.length === 0 || selectedUAVs.every((u) => u.status === "running")}
+            className="h-10 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90"
+            style={selectedUAVs.length > 0 ? { boxShadow: "var(--shadow-glow)" } : {}}
+          >
+            <Play className="h-4 w-4 mr-2" /> Start Selected
+          </Button>
+          <Button
+            onClick={stopSelected}
+            disabled={selectedUAVs.length === 0 || selectedUAVs.every((u) => u.status === "idle")}
+            variant="outline"
+            className="h-10 text-sm font-bold border-border bg-secondary text-foreground hover:bg-secondary/70"
+          >
+            <Square className="h-4 w-4 mr-2" /> Stop Selected
+          </Button>
+          <Button
+            onClick={() => setConfirmOpen(true)}
+            disabled={selectedUAVs.length === 0}
+            className="h-10 text-sm font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            <Siren className="h-4 w-4 mr-2" /> Emergency Land
+          </Button>
         </div>
-        <Button
-          onClick={() => setConfirmOpen(true)}
-          className="w-full h-16 text-lg font-extrabold uppercase tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
-          style={{ boxShadow: "0 10px 40px -10px oklch(0.62 0.24 25 / 0.7)" }}
-        >
-          <Siren className="h-6 w-6 mr-2" />
-          Emergency Landing
-        </Button>
+      </div>
+
+      {/* UAV List */}
+      <div className="flex flex-col gap-3">
+        {uavs.map((uav) => {
+          const badge = badgeStyles[uav.status];
+          return (
+            <div
+              key={uav.id}
+              className={`bg-card border rounded-xl p-3 flex flex-col sm:flex-row items-center gap-4 relative transition-all duration-300 ${
+                uav.selected ? "border-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]" : "border-border"
+              }`}
+            >
+              {/* Checkbox & Plane Icon */}
+              <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
+                <Checkbox checked={uav.selected} onCheckedChange={() => toggleSelection(uav.id)} />
+                <div
+                  className={`h-10 w-10 rounded-lg flex shrink-0 items-center justify-center transition-colors cursor-pointer ${
+                    uav.status === "running"
+                      ? "bg-[oklch(var(--success))] text-primary-foreground shadow-[0_0_20px_oklch(var(--success)_/_0.4)]"
+                      : uav.status === "landing"
+                      ? "bg-destructive text-destructive-foreground animate-pulse"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                  onClick={() => toggleSelection(uav.id)}
+                >
+                  <Plane className="h-5 w-5" />
+                </div>
+                
+                {/* Mobile Info View */}
+                <div className="flex-1 sm:hidden cursor-pointer" onClick={() => toggleSelection(uav.id)}>
+                  <h3 className="text-base font-bold text-foreground truncate">{uav.city}</h3>
+                  <p className="text-xs text-muted-foreground">{uav.id}</p>
+                </div>
+                
+                {/* Mobile Status Badge */}
+                <div className="sm:hidden shrink-0">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${badge.color}`}>
+                    {badge.label}
+                  </span>
+                </div>
+              </div>
+
+              {/* Desktop Info View */}
+              <div className="hidden sm:block flex-1 min-w-0 cursor-pointer" onClick={() => toggleSelection(uav.id)}>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-base font-bold text-foreground truncate" title={uav.city}>
+                    {uav.city}
+                  </h3>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${badge.color}`}>
+                    {badge.label}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">{uav.id}</p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+                <div className="flex gap-2 flex-1 sm:flex-none">
+                  <Button
+                    onClick={() => setStatusSingle(uav.id, "running")}
+                    disabled={uav.status === "running"}
+                    variant={uav.status === "idle" ? "default" : "outline"}
+                    className="flex-1 sm:flex-none text-xs h-8 px-3 bg-primary/20 text-primary hover:bg-primary hover:text-primary-foreground border-transparent"
+                  >
+                    <Play className="h-3 w-3 mr-1" /> Start
+                  </Button>
+                  <Button
+                    onClick={() => setStatusSingle(uav.id, "idle")}
+                    disabled={uav.status === "idle"}
+                    variant="outline"
+                    className="flex-1 sm:flex-none text-xs h-8 px-3 border-border bg-secondary hover:bg-secondary/70 text-foreground"
+                  >
+                    <Square className="h-3 w-3 mr-1" /> Stop
+                  </Button>
+                </div>
+
+                <div className="hidden sm:block w-px h-6 bg-border mx-1"></div>
+
+                <div className="flex gap-1 shrink-0">
+                  <button className="h-8 w-8 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors" title="Return Home">
+                    <HomeIcon className="h-4 w-4" />
+                  </button>
+                  <button className="h-8 w-8 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors" title="Capture">
+                    <Camera className="h-4 w-4" />
+                  </button>
+                  <button className="h-8 w-8 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors" title="Auto Hover">
+                    <Plane className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
@@ -122,17 +236,24 @@ export function ControlPanel() {
             <div className="mx-auto h-12 w-12 rounded-full bg-destructive/20 flex items-center justify-center mb-2">
               <Siren className="h-6 w-6 text-destructive" />
             </div>
-            <DialogTitle className="text-center text-foreground">Confirm Emergency Landing</DialogTitle>
-            <DialogDescription className="text-center">
-              The UAV will immediately descend and land at its current position. Continue?
+            <DialogTitle className="text-center text-foreground">Confirm Fleet Emergency Landing</DialogTitle>
+            <DialogDescription className="text-center text-muted-foreground">
+              {selectedUAVs.length} selected UAVs will immediately descend and land at their current positions. Continue?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="outline" onClick={() => setConfirmOpen(false)} className="border-border bg-secondary text-foreground hover:bg-secondary/70">
+          <DialogFooter className="gap-2 sm:gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+              className="border-border bg-secondary text-foreground hover:bg-secondary/70"
+            >
               Cancel
             </Button>
-            <Button onClick={emergencyLand} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Yes, Land Now
+            <Button
+              onClick={emergencyLandSelected}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-bold"
+            >
+              Yes, Land All Selected
             </Button>
           </DialogFooter>
         </DialogContent>

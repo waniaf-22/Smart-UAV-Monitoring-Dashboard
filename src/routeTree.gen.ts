@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ControlRouteImport } from './routes/control'
 import { Route as AlertsRouteImport } from './routes/alerts'
@@ -18,6 +20,16 @@ import { Route as IndexRouteImport } from './routes/index'
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -46,6 +58,8 @@ export interface FileRoutesByFullPath {
   '/alerts': typeof AlertsRoute
   '/control': typeof ControlRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +67,8 @@ export interface FileRoutesByTo {
   '/alerts': typeof AlertsRoute
   '/control': typeof ControlRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
 }
 export interface FileRoutesById {
@@ -61,14 +77,38 @@ export interface FileRoutesById {
   '/alerts': typeof AlertsRoute
   '/control': typeof ControlRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/alerts' | '/control' | '/dashboard' | '/reports'
+  fullPaths:
+    | '/'
+    | '/alerts'
+    | '/control'
+    | '/dashboard'
+    | '/profile'
+    | '/register'
+    | '/reports'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/alerts' | '/control' | '/dashboard' | '/reports'
-  id: '__root__' | '/' | '/alerts' | '/control' | '/dashboard' | '/reports'
+  to:
+    | '/'
+    | '/alerts'
+    | '/control'
+    | '/dashboard'
+    | '/profile'
+    | '/register'
+    | '/reports'
+  id:
+    | '__root__'
+    | '/'
+    | '/alerts'
+    | '/control'
+    | '/dashboard'
+    | '/profile'
+    | '/register'
+    | '/reports'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +116,8 @@ export interface RootRouteChildren {
   AlertsRoute: typeof AlertsRoute
   ControlRoute: typeof ControlRoute
   DashboardRoute: typeof DashboardRoute
+  ProfileRoute: typeof ProfileRoute
+  RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRoute
 }
 
@@ -86,6 +128,20 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -124,6 +180,8 @@ const rootRouteChildren: RootRouteChildren = {
   AlertsRoute: AlertsRoute,
   ControlRoute: ControlRoute,
   DashboardRoute: DashboardRoute,
+  ProfileRoute: ProfileRoute,
+  RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRoute,
 }
 export const routeTree = rootRouteImport
