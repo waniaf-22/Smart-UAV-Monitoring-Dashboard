@@ -1,4 +1,4 @@
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, AlertTriangle, Gamepad2, FileBarChart, LogOut, Plane } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +9,7 @@ const navItems = [
   { to: "/reports", label: "Reports", icon: FileBarChart },
 ] as const;
 
-export function AppLayout() {
+export function AppLayout({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -62,7 +62,7 @@ export function AppLayout() {
       </aside>
 
       <main className="flex-1 min-w-0 overflow-auto">
-        <Outlet />
+        {children}
       </main>
     </div>
   );
