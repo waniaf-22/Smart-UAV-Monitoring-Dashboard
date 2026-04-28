@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, Link } from "@tanstack/react-router";
 import { Plane, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -133,6 +133,13 @@ export function LoginScreen() {
               Sign In
             </Button>
           </form>
+
+          <p className="text-center text-sm text-muted-foreground mt-5">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-primary hover:underline font-medium">
+              Create Account
+            </Link>
+          </p>
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
