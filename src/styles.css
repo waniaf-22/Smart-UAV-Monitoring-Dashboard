@@ -63,25 +63,41 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* Deep night canvas behind the phone */
+  --background: oklch(0.16 0.03 285);
+  --foreground: oklch(0.98 0.005 280);
+
+  /* Phone surface (dark glass) */
+  --card: oklch(0.18 0.025 285);
+  --card-foreground: oklch(0.98 0.005 280);
+  --popover: oklch(0.2 0.03 285);
+  --popover-foreground: oklch(0.98 0.005 280);
+
+  /* Vivid magenta primary */
+  --primary: oklch(0.7 0.25 350);
+  --primary-foreground: oklch(0.16 0.03 285);
+  --primary-glow: oklch(0.78 0.22 340);
+
+  --secondary: oklch(0.26 0.035 285);
+  --secondary-foreground: oklch(0.98 0.005 280);
+  --muted: oklch(0.24 0.03 285);
+  --muted-foreground: oklch(0.7 0.02 285);
+  --accent: oklch(0.7 0.22 30);
+  --accent-foreground: oklch(0.16 0.03 285);
+  --destructive: oklch(0.65 0.24 25);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.3 0.03 285);
+  --input: oklch(0.28 0.03 285);
+  --ring: oklch(0.7 0.25 350);
+
+  /* Custom design tokens */
+  --gradient-primary: linear-gradient(135deg, oklch(0.7 0.25 350), oklch(0.7 0.22 30));
+  --gradient-canvas: radial-gradient(circle at 20% 10%, oklch(0.3 0.12 320) 0%, oklch(0.14 0.03 285) 60%);
+  --gradient-player: linear-gradient(180deg, oklch(0.22 0.06 320) 0%, oklch(0.16 0.03 285) 100%);
+  --shadow-phone: 0 40px 80px -20px oklch(0 0 0 / 0.6), 0 0 0 1px oklch(1 0 0 / 0.06);
+  --shadow-glow: 0 20px 60px -15px oklch(0.7 0.25 350 / 0.6);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);

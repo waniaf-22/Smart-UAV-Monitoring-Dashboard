@@ -1,26 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { MobilePhoneFrame } from "@/components/MobilePhoneFrame";
+import { MusicPlayer } from "@/components/MusicPlayer";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "Lunar — Mobile Music Player UI" },
+      {
+        name: "description",
+        content:
+          "A beautifully designed mobile music player UI concept with a now-playing screen, controls, and tab bar.",
+      },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  return (
+    <main
+      className="min-h-screen"
+      style={{ background: "var(--gradient-canvas)" }}
+    >
+      <h1 className="sr-only">Lunar Mobile Music Player</h1>
+      <MobilePhoneFrame>
+        <MusicPlayer />
+      </MobilePhoneFrame>
+    </main>
+  );
 }
