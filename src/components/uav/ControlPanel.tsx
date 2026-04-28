@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 type Status = "idle" | "running" | "landing";
@@ -81,15 +82,38 @@ export function ControlPanel() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <Button variant="outline" className="h-14 border-border bg-secondary text-foreground hover:bg-secondary/70">
-          <HomeIcon className="h-4 w-4 mr-2" /> Return Home
-        </Button>
-        <Button variant="outline" className="h-14 border-border bg-secondary text-foreground hover:bg-secondary/70">
-          <Camera className="h-4 w-4 mr-2" /> Capture
-        </Button>
-        <Button variant="outline" className="h-14 border-border bg-secondary text-foreground hover:bg-secondary/70">
-          <Plane className="h-4 w-4 mr-2" /> Auto Hover
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" className="h-14 border-border bg-secondary text-foreground hover:bg-secondary/70">
+              <HomeIcon className="h-4 w-4 mr-2" /> Return Home
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Automatically fly back to the designated home point.</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" className="h-14 border-border bg-secondary text-foreground hover:bg-secondary/70">
+              <Camera className="h-4 w-4 mr-2" /> Capture
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Take a high-resolution photo from the primary camera.</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" className="h-14 border-border bg-secondary text-foreground hover:bg-secondary/70">
+              <Plane className="h-4 w-4 mr-2" /> Auto Hover
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Maintain current altitude and position automatically.</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       <div

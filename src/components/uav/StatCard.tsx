@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function StatCard({
   icon: Icon,
@@ -7,12 +8,14 @@ export function StatCard({
   value,
   unit,
   tone = "default",
+  tooltip,
 }: {
   icon: LucideIcon;
   label: string;
   value: string | number;
   unit?: string;
   tone?: "default" | "warning" | "danger" | "success";
+  tooltip?: string;
 }) {
   const toneClass = {
     default: "text-primary",
@@ -21,7 +24,7 @@ export function StatCard({
     success: "text-[oklch(var(--success))]",
   }[tone];
 
-  return (
+  const content = (
     <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
       <div className={cn("h-11 w-11 rounded-lg bg-secondary flex items-center justify-center", toneClass)}>
         <Icon className="h-5 w-5" />
@@ -34,5 +37,18 @@ export function StatCard({
         </p>
       </div>
     </div>
+  );
+
+  if (!tooltip) return content;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {content}
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{tooltip}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }

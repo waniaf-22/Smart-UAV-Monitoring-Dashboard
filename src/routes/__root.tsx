@@ -51,6 +51,8 @@ export const Route = createRootRoute({
   notFoundComponent: NotFoundComponent,
 });
 
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -58,8 +60,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
-        <Toaster theme="dark" position="top-right" />
+        <TooltipProvider>
+          {children}
+          <Toaster theme="dark" position="top-right" />
+        </TooltipProvider>
         <Scripts />
       </body>
     </html>

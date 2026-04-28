@@ -26,12 +26,12 @@ export function Reports() {
 
   return (
     <div className="p-6 space-y-6">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Flight Reports</h1>
           <p className="text-sm text-muted-foreground">History of past missions and aggregate performance.</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 self-start sm:self-auto w-full sm:w-auto">
           <Download className="h-4 w-4 mr-2" /> Export CSV
         </Button>
       </header>

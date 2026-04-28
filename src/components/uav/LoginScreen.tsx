@@ -6,19 +6,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export function LoginScreen() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("operator");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
+  
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
-      toast.error("Please enter username and password");
-      return;
+    let hasError = false;
+    
+    if (!username) {
+      setUsernameError("Username is required");
+      hasError = true;
+    } else {
+      setUsernameError("");
     }
+    
+    if (!password) {
+      setPasswordError("Password is required");
+      hasError = true;
+    } else {
+      setPasswordError("");
+    }
+
+    if (hasError) return;
+
     toast.success("Authenticated. Welcome, Operator.");
     navigate({ to: "/dashboard" });
   };
@@ -50,34 +68,48 @@ export function LoginScreen() {
 
           <form onSubmit={onSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username" className={usernameError ? "text-destructive" : ""}>Username</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <User className={cn("absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4", usernameError ? "text-destructive" : "text-muted-foreground")} />
                 <Input
                   id="username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="pl-10 h-11 bg-secondary border-border text-foreground"
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (usernameError) setUsernameError("");
+                  }}
+                  className={cn(
+                    "pl-10 h-11 bg-secondary text-foreground",
+                    usernameError ? "border-destructive focus-visible:ring-destructive" : "border-border"
+                  )}
                   placeholder="Enter username"
                   autoComplete="username"
                 />
               </div>
+              {usernameError && <p className="text-xs text-destructive font-medium">{usernameError}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className={passwordError ? "text-destructive" : ""}>Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className={cn("absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4", passwordError ? "text-destructive" : "text-muted-foreground")} />
                 <Input
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 h-11 bg-secondary border-border text-foreground"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (passwordError) setPasswordError("");
+                  }}
+                  className={cn(
+                    "pl-10 h-11 bg-secondary text-foreground",
+                    passwordError ? "border-destructive focus-visible:ring-destructive" : "border-border"
+                  )}
                   placeholder="••••••••"
                   autoComplete="current-password"
                 />
               </div>
+              {passwordError && <p className="text-xs text-destructive font-medium">{passwordError}</p>}
             </div>
 
             <div className="flex items-center justify-between">
