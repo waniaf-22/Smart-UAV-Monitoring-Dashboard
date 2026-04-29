@@ -11,12 +11,12 @@ export function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    username: "",
+    fullName: "Smeer Rajani",
+    email: "sameer12@gmail.com",
+    username: "smeer_ops",
     password: "",
     confirmPassword: "",
-    operatorId: "",
+    operatorId: "23i-0760",
   });
 
   const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
