@@ -1,17 +1,47 @@
-import { AlertTriangle, Wind, ArrowDownToLine, RotateCcw, Compass, Gauge, Eye, Thermometer, MapPin, Plane, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Wind, ArrowDownToLine, RotateCcw, Compass, Gauge, Eye, Thermometer, MapPin, Plane, ShieldAlert, CloudLightning } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
+import { useFleet } from "@/context/FleetContext";
+import { dashboardState } from "./Dashboard";
+import { toast } from "sonner";
 
-export function WindAlert() {
+export function WeatherAlert() {
+  const { uavs, activeUav, emergencyLandSingle, logFlightEvent } = useFleet();
+  const router = useRouter();
+
+  // Identify UAVs running in the same city as the active one (since storm is local to active city)
+  const threatenedUavs = uavs.filter((u) => u.city === activeUav.city && u.status === "running");
+  
+  const handleGroundFleet = () => {
+    if (threatenedUavs.length === 0) return;
+    threatenedUavs.forEach((u) => {
+      emergencyLandSingle(u.id);
+      logFlightEvent(u.id, {
+        city: u.city,
+        duration: "00:15:32",
+        distance: 4.2,
+        efficiency: 15,
+        status: "emergency",
+      });
+    });
+    toast.success("Emergency Landing Initiated", { description: "Threatened UAVs ordered to evade and land immediately." });
+    router.navigate({ to: "/control" });
+  };
+
+  const handleAcknowledge = () => {
+    dashboardState.stormAlertFired = true; // Acknowledged, won't pop up again
+    dashboardState.stormAlertOpen = false;
+    router.navigate({ to: "/dashboard" });
+  };
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
       {/* HEADER */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Wind className="h-8 w-8 text-primary" /> Weather Intelligence
+            <CloudLightning className="h-8 w-8 text-primary" /> Weather Intelligence
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Real-time meteorological monitoring and fleet safety control.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Real-time meteorological monitoring and fleet safety control. • <span className="text-destructive font-medium">{activeUav.city} Sector</span></p>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-secondary/50 px-4 py-2 rounded-full border border-border">
           <div className="w-2 h-2 rounded-full bg-destructive animate-pulse"></div>
@@ -37,13 +67,13 @@ export function WindAlert() {
               background: "oklch(0.62 0.24 25)",
               boxShadow: "0 0 60px oklch(0.62 0.24 25 / 0.8)",
             }}>
-            <AlertTriangle className="h-12 w-12 text-foreground animate-pulse" />
+            <CloudLightning className="h-12 w-12 text-foreground animate-pulse" />
           </div>
           <div className="text-center md:text-left">
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-[oklch(var(--warning))] mb-2">Critical Weather Alert</p>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-3">HIGH WIND WARNING</h2>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-3">SEVERE THUNDERSTORM</h2>
             <p className="text-lg text-foreground/90 max-w-2xl">
-              Sustained winds of <span className="font-bold text-[oklch(var(--warning))]">38 km/h</span> with gusts up to <span className="font-bold text-destructive">52 km/h</span> detected. Coastal and southern operational sectors are severely impacted.
+              Microburst moving SE at <span className="font-bold text-[oklch(var(--warning))]">55 km/h</span> detected. Heavy rain core will reach the {activeUav.city} sector in <span className="font-bold text-destructive">{dashboardState.stormEtaSeconds > 0 ? dashboardState.stormEtaSeconds : 0} seconds</span>.
             </p>
           </div>
         </div>
@@ -54,21 +84,21 @@ export function WindAlert() {
         <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between">
             <div className="flex items-center gap-2 text-muted-foreground mb-4">
-              <Wind className="h-4 w-4" /> <span className="text-xs uppercase font-bold tracking-wider">Wind Speed</span>
+              <Wind className="h-4 w-4" /> <span className="text-xs uppercase font-bold tracking-wider">Storm Speed</span>
             </div>
             <div>
-              <span className="text-4xl font-bold text-foreground">38</span>
+              <span className="text-4xl font-bold text-foreground">55</span>
               <span className="text-sm text-muted-foreground ml-1">km/h</span>
             </div>
           </div>
           <div className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between relative overflow-hidden">
             <div className="absolute inset-0 bg-destructive/5"></div>
             <div className="flex items-center gap-2 text-destructive mb-4 relative z-10">
-              <AlertTriangle className="h-4 w-4" /> <span className="text-xs uppercase font-bold tracking-wider">Peak Gusts</span>
+              <CloudLightning className="h-4 w-4" /> <span className="text-xs uppercase font-bold tracking-wider">Impact ETA</span>
             </div>
             <div className="relative z-10">
-              <span className="text-4xl font-bold text-destructive">52</span>
-              <span className="text-sm text-destructive/80 ml-1">km/h</span>
+              <span className="text-4xl font-bold text-destructive">{dashboardState.stormEtaSeconds > 0 ? dashboardState.stormEtaSeconds : 0}</span>
+              <span className="text-sm text-destructive/80 ml-1">sec</span>
             </div>
           </div>
           <div className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between">
@@ -76,7 +106,7 @@ export function WindAlert() {
               <Compass className="h-4 w-4" /> <span className="text-xs uppercase font-bold tracking-wider">Direction</span>
             </div>
             <div>
-              <span className="text-2xl font-bold text-foreground">NW <span className="text-sm text-muted-foreground font-normal">(315°)</span></span>
+              <span className="text-2xl font-bold text-foreground">SE <span className="text-sm text-muted-foreground font-normal">(135°)</span></span>
             </div>
           </div>
           <div className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between">
@@ -84,7 +114,7 @@ export function WindAlert() {
               <Gauge className="h-4 w-4" /> <span className="text-xs uppercase font-bold tracking-wider">Pressure</span>
             </div>
             <div>
-              <span className="text-2xl font-bold text-foreground">1008</span>
+              <span className="text-2xl font-bold text-foreground">982</span>
               <span className="text-sm text-muted-foreground ml-1">hPa</span>
             </div>
           </div>
@@ -93,7 +123,7 @@ export function WindAlert() {
               <Thermometer className="h-4 w-4" /> <span className="text-xs uppercase font-bold tracking-wider">Temperature</span>
             </div>
             <div>
-              <span className="text-2xl font-bold text-foreground">24°C</span>
+              <span className="text-2xl font-bold text-foreground">18°C</span>
             </div>
           </div>
           <div className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between">
@@ -101,7 +131,7 @@ export function WindAlert() {
               <Eye className="h-4 w-4" /> <span className="text-xs uppercase font-bold tracking-wider">Visibility</span>
             </div>
             <div>
-              <span className="text-2xl font-bold text-foreground">8.5</span>
+              <span className="text-2xl font-bold text-destructive">0.8</span>
               <span className="text-sm text-muted-foreground ml-1">km</span>
             </div>
           </div>
@@ -111,7 +141,7 @@ export function WindAlert() {
                <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-1">
                  <ShieldAlert className="h-4 w-4 text-[oklch(var(--warning))]" /> Automated Flight Advisory
                </h3>
-               <p className="text-xs text-muted-foreground">Flight ceilings restricted to 50m. Expected battery drain increased by 40% due to compensation maneuvers.</p>
+               <p className="text-xs text-muted-foreground">High wind sheer detected. RTH may be compromised. Recommended immediate local grounding or evasion maneuvers.</p>
              </div>
           </div>
         </div>
@@ -123,49 +153,42 @@ export function WindAlert() {
                <MapPin className="h-4 w-4 text-primary" /> Affected Fleet Zones
              </h3>
              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                  <div className="flex items-center gap-3">
-                    <Plane className="h-5 w-5 text-destructive" />
-                    <div>
-                      <p className="text-sm font-bold text-foreground">UAV-02 (Karachi)</p>
-                      <p className="text-xs text-destructive">Severe Crosswinds</p>
+                {threatenedUavs.length > 0 ? (
+                  threatenedUavs.map(u => (
+                    <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                      <div className="flex items-center gap-3">
+                        <Plane className="h-5 w-5 text-destructive" />
+                        <div>
+                          <p className="text-sm font-bold text-foreground">{u.id} ({u.city})</p>
+                          <p className="text-xs text-destructive">In Storm Path</p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-1 text-[10px] font-bold rounded bg-destructive text-destructive-foreground uppercase">Threatened</span>
                     </div>
-                  </div>
-                  <span className="px-2 py-1 text-[10px] font-bold rounded bg-destructive text-destructive-foreground uppercase">In Flight</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-[oklch(var(--warning))]/10 border border-[oklch(var(--warning))]/20">
-                  <div className="flex items-center gap-3">
-                    <Plane className="h-5 w-5 text-[oklch(var(--warning))]" />
-                    <div>
-                      <p className="text-sm font-bold text-foreground">UAV-11 (Hyderabad)</p>
-                      <p className="text-xs text-[oklch(var(--warning))]">Elevated Gusts</p>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-secondary border border-border">
+                    <div className="flex items-center gap-3">
+                      <Plane className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-bold text-foreground">No UAVs in Danger</p>
+                        <p className="text-xs text-muted-foreground">Fleet is grounded or outside storm path</p>
+                      </div>
                     </div>
+                    <span className="px-2 py-1 text-[10px] font-bold rounded bg-muted text-foreground uppercase">Safe</span>
                   </div>
-                  <span className="px-2 py-1 text-[10px] font-bold rounded bg-[oklch(var(--warning))] text-background uppercase">In Flight</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-secondary border border-border">
-                  <div className="flex items-center gap-3">
-                    <Plane className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-bold text-foreground">UAV-14 (Larkana)</p>
-                      <p className="text-xs text-muted-foreground">Approaching Front</p>
-                    </div>
-                  </div>
-                  <span className="px-2 py-1 text-[10px] font-bold rounded bg-muted text-foreground uppercase">Grounded</span>
-                </div>
+                )}
              </div>
           </div>
 
           <div className="bg-card border border-border rounded-2xl p-6">
             <h3 className="text-sm font-bold text-foreground mb-4">Emergency Actions</h3>
             <div className="space-y-3">
-              <Button asChild className="w-full h-12 font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90" style={{ boxShadow: "0 4px 14px 0 oklch(0.62 0.24 25 / 0.39)" }}>
-                <Link to="/control">
-                  <ArrowDownToLine className="h-4 w-4 mr-2" />
-                  Ground Affected Fleet
-                </Link>
+              <Button onClick={handleGroundFleet} disabled={threatenedUavs.length === 0} className="w-full h-12 font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50" style={{ boxShadow: "0 4px 14px 0 oklch(0.62 0.24 25 / 0.39)" }}>
+                <ArrowDownToLine className="h-4 w-4 mr-2" />
+                Evade & Land Affected Fleet
               </Button>
-              <Button variant="outline" className="w-full h-12 font-bold border-border bg-secondary text-foreground hover:bg-secondary/80">
+              <Button onClick={handleAcknowledge} variant="outline" className="w-full h-12 font-bold border-border bg-secondary text-foreground hover:bg-secondary/80">
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Acknowledge Warning
               </Button>

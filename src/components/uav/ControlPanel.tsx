@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Play, Square, Siren, Plane, CheckSquare, Square as SquareOutline, Camera, Home as HomeIcon } from "lucide-react";
+import { useState } from "react";
+import { Play, Square, Siren, Plane, Camera, Home as HomeIcon, Gamepad2, MonitorDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -11,89 +11,73 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-
-type Status = "idle" | "running" | "landing";
-
-interface UAV {
-  id: string;
-  city: string;
-  status: Status;
-  selected: boolean;
-}
-
-const INITIAL_UAVS: UAV[] = [
-  { id: "UAV-01", city: "Islamabad", status: "idle", selected: false },
-  { id: "UAV-02", city: "Karachi", status: "idle", selected: false },
-  { id: "UAV-03", city: "Lahore", status: "idle", selected: false },
-  { id: "UAV-04", city: "Peshawar", status: "idle", selected: false },
-  { id: "UAV-05", city: "Quetta", status: "idle", selected: false },
-  { id: "UAV-06", city: "Multan", status: "idle", selected: false },
-  { id: "UAV-07", city: "Faisalabad", status: "idle", selected: false },
-  { id: "UAV-08", city: "Rawalpindi", status: "idle", selected: false },
-  { id: "UAV-09", city: "Gujranwala", status: "idle", selected: false },
-  { id: "UAV-10", city: "Sialkot", status: "idle", selected: false },
-  { id: "UAV-11", city: "Hyderabad", status: "idle", selected: false },
-  { id: "UAV-12", city: "Bahawalpur", status: "idle", selected: false },
-  { id: "UAV-13", city: "Sukkur", status: "idle", selected: false },
-  { id: "UAV-14", city: "Larkana", status: "idle", selected: false },
-];
+import { useFleet } from "@/context/FleetContext";
 
 const badgeStyles = {
-  idle: { label: "Idle", color: "bg-muted text-foreground" },
-  running: { label: "In Flight", color: "bg-[oklch(var(--success))] text-primary-foreground" },
-  landing: { label: "Landing", color: "bg-destructive text-destructive-foreground" },
+  idle:    { label: "Idle",      color: "bg-muted text-foreground" },
+  running: { label: "In Flight", color: "text-green-500 bg-green-500/10 border border-green-500/20" },
+  landing: { label: "Landing",   color: "text-green-500 bg-green-500/10 border border-green-500/20 animate-pulse" },
 };
 
 export function ControlPanel() {
-  const [uavs, setUavs] = useState<UAV[]>(INITIAL_UAVS);
+  const {
+    uavs,
+    activeUavId,
+    setActiveUavAndNavigate,
+    toggleSelection,
+    toggleSelectAll,
+    setStatusSingle,
+    startSelected,
+    stopSelected,
+    emergencyLandSelected,
+  } = useFleet();
+
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Derived state
-  const selectedUAVs = useMemo(() => uavs.filter((u) => u.selected), [uavs]);
-  const activeUAVs = useMemo(() => uavs.filter((u) => u.status === "running"), [uavs]);
-  const allSelected = selectedUAVs.length === uavs.length && uavs.length > 0;
+  const selectedUAVs = uavs.filter((u) => u.selected);
+  const activeUAVs   = uavs.filter((u) => u.status === "running");
+  const allSelected  = selectedUAVs.length === uavs.length && uavs.length > 0;
 
-  // Actions
-  const toggleSelection = (id: string) => {
-    setUavs((prev) => prev.map((u) => (u.id === id ? { ...u, selected: !u.selected } : u)));
-  };
-
-  const toggleSelectAll = () => {
-    setUavs((prev) => prev.map((u) => ({ ...u, selected: !allSelected })));
-  };
-
-  const setStatusSingle = (id: string, status: Status) => {
-    setUavs((prev) => prev.map((u) => (u.id === id ? { ...u, status } : u)));
-    if (status === "running") toast.success(`${id} started`, { description: "Motors armed. Lifting off." });
-    if (status === "idle") toast(`${id} stopped`, { description: "Motors disarmed." });
-  };
-
-  const startSelected = () => {
+  const handleStartSelected = () => {
     const idleSelected = selectedUAVs.filter((u) => u.status === "idle");
     if (idleSelected.length === 0) return;
-    setUavs((prev) => prev.map((u) => (u.selected && u.status === "idle" ? { ...u, status: "running" } : u)));
+    startSelected();
     toast.success(`${idleSelected.length} UAV(s) started`, { description: "Simultaneous lift-off initiated." });
   };
 
-  const stopSelected = () => {
+  const handleStopSelected = () => {
     const activeSelected = selectedUAVs.filter((u) => u.status !== "idle");
     if (activeSelected.length === 0) return;
-    setUavs((prev) => prev.map((u) => (u.selected && u.status !== "idle" ? { ...u, status: "idle" } : u)));
+    stopSelected();
     toast(`${activeSelected.length} UAV(s) stopped`, { description: "Motors disarmed." });
   };
 
-  const emergencyLandSelected = () => {
-    setUavs((prev) => prev.map((u) => (u.selected ? { ...u, status: "landing" } : u)));
+  const handleStatusSingle = (id: string, status: "running" | "idle") => {
+    setStatusSingle(id, status);
+    if (status === "running") toast.success(`${id} started`, { description: "Motors armed. Lifting off." });
+    if (status === "idle")    toast(`${id} stopped`, { description: "Motors disarmed." });
+  };
+
+  const handleEmergencyConfirm = () => {
+    emergencyLandSelected();
     setConfirmOpen(false);
     toast.error("Emergency landing initiated", { description: "Selected UAVs descending immediately." });
   };
 
+  const handleMonitor = (id: string) => {
+    setActiveUavAndNavigate(id);
+    toast.success(`Monitoring ${id}`, { description: "Dashboard updated to live telemetry feed." });
+  };
+
   return (
-    <div className="p-6 space-y-6">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Fleet Control</h1>
+    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <header className="mb-4">
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <Gamepad2 className="h-8 w-8 text-primary" /> Fleet Control
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage {uavs.length} assigned UAVs across major cities. Active: {activeUAVs.length}
+          Manage {uavs.length} assigned UAVs across major cities. Active:{" "}
+          <span className="text-[oklch(var(--success))] font-semibold">{activeUAVs.length}</span>
         </p>
       </header>
 
@@ -111,7 +95,7 @@ export function ControlPanel() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Button
-            onClick={startSelected}
+            onClick={handleStartSelected}
             disabled={selectedUAVs.length === 0 || selectedUAVs.every((u) => u.status === "running")}
             className="h-10 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90"
             style={selectedUAVs.length > 0 ? { boxShadow: "var(--shadow-glow)" } : {}}
@@ -119,7 +103,7 @@ export function ControlPanel() {
             <Play className="h-4 w-4 mr-2" /> Start Selected
           </Button>
           <Button
-            onClick={stopSelected}
+            onClick={handleStopSelected}
             disabled={selectedUAVs.length === 0 || selectedUAVs.every((u) => u.status === "idle")}
             variant="outline"
             className="h-10 text-sm font-bold border-border bg-secondary text-foreground hover:bg-secondary/70"
@@ -139,7 +123,8 @@ export function ControlPanel() {
       {/* UAV List */}
       <div className="flex flex-col gap-3">
         {uavs.map((uav) => {
-          const badge = badgeStyles[uav.status];
+          const badge    = badgeStyles[uav.status];
+          const isActive = uav.id === activeUavId;
           return (
             <div
               key={uav.id}
@@ -152,23 +137,21 @@ export function ControlPanel() {
                 <Checkbox checked={uav.selected} onCheckedChange={() => toggleSelection(uav.id)} />
                 <div
                   className={`h-10 w-10 rounded-lg flex shrink-0 items-center justify-center transition-colors cursor-pointer ${
-                    uav.status === "running"
-                      ? "bg-[oklch(var(--success))] text-primary-foreground shadow-[0_0_20px_oklch(var(--success)_/_0.4)]"
-                      : uav.status === "landing"
-                      ? "bg-destructive text-destructive-foreground animate-pulse"
+                    uav.status !== "idle"
+                      ? "text-green-500 bg-green-500/10 border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
                       : "bg-muted text-muted-foreground"
                   }`}
                   onClick={() => toggleSelection(uav.id)}
                 >
                   <Plane className="h-5 w-5" />
                 </div>
-                
-                {/* Mobile Info View */}
+
+                {/* Mobile Info */}
                 <div className="flex-1 sm:hidden cursor-pointer" onClick={() => toggleSelection(uav.id)}>
                   <h3 className="text-base font-bold text-foreground truncate">{uav.city}</h3>
                   <p className="text-xs text-muted-foreground">{uav.id}</p>
                 </div>
-                
+
                 {/* Mobile Status Badge */}
                 <div className="sm:hidden shrink-0">
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${badge.color}`}>
@@ -177,7 +160,7 @@ export function ControlPanel() {
                 </div>
               </div>
 
-              {/* Desktop Info View */}
+              {/* Desktop Info */}
               <div className="hidden sm:block flex-1 min-w-0 cursor-pointer" onClick={() => toggleSelection(uav.id)}>
                 <div className="flex items-center gap-3">
                   <h3 className="text-base font-bold text-foreground truncate" title={uav.city}>
@@ -186,6 +169,11 @@ export function ControlPanel() {
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${badge.color}`}>
                     {badge.label}
                   </span>
+                  {isActive && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/40 flex items-center gap-1">
+                      <MonitorDot className="h-3 w-3" /> Monitoring
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">{uav.id}</p>
               </div>
@@ -194,7 +182,7 @@ export function ControlPanel() {
               <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
                 <div className="flex gap-2 flex-1 sm:flex-none">
                   <Button
-                    onClick={() => setStatusSingle(uav.id, "running")}
+                    onClick={() => handleStatusSingle(uav.id, "running")}
                     disabled={uav.status === "running"}
                     variant={uav.status === "idle" ? "default" : "outline"}
                     className="flex-1 sm:flex-none text-xs h-8 px-3 bg-primary/20 text-primary hover:bg-primary hover:text-primary-foreground border-transparent"
@@ -202,7 +190,7 @@ export function ControlPanel() {
                     <Play className="h-3 w-3 mr-1" /> Start
                   </Button>
                   <Button
-                    onClick={() => setStatusSingle(uav.id, "idle")}
+                    onClick={() => handleStatusSingle(uav.id, "idle")}
                     disabled={uav.status === "idle"}
                     variant="outline"
                     className="flex-1 sm:flex-none text-xs h-8 px-3 border-border bg-secondary hover:bg-secondary/70 text-foreground"
@@ -211,17 +199,33 @@ export function ControlPanel() {
                   </Button>
                 </div>
 
-                <div className="hidden sm:block w-px h-6 bg-border mx-1"></div>
+                <div className="hidden sm:block w-px h-6 bg-border mx-1" />
 
                 <div className="flex gap-1 shrink-0">
-                  <button className="h-8 w-8 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors" title="Return Home">
+                  <button
+                    className="h-8 w-8 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                    title="Return Home"
+                  >
                     <HomeIcon className="h-4 w-4" />
                   </button>
-                  <button className="h-8 w-8 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors" title="Capture">
+                  <button
+                    className="h-8 w-8 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                    title="Capture"
+                  >
                     <Camera className="h-4 w-4" />
                   </button>
-                  <button className="h-8 w-8 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors" title="Auto Hover">
-                    <Plane className="h-4 w-4" />
+                  {/* ── Monitor on Dashboard ───────────────────────────── */}
+                  <button
+                    onClick={() => handleMonitor(uav.id)}
+                    title="Monitor live telemetry on Dashboard"
+                    className={`h-8 px-2 rounded flex items-center gap-1 text-xs font-semibold transition-all ${
+                      isActive
+                        ? "bg-primary/20 text-primary border border-primary/40"
+                        : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
+                    <MonitorDot className="h-4 w-4" />
+                    <span className="hidden lg:inline">{isActive ? "Live" : "Monitor"}</span>
                   </button>
                 </div>
               </div>
@@ -230,6 +234,7 @@ export function ControlPanel() {
         })}
       </div>
 
+      {/* Emergency Landing Confirmation Dialog */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="bg-card border-border">
           <DialogHeader>
@@ -238,7 +243,7 @@ export function ControlPanel() {
             </div>
             <DialogTitle className="text-center text-foreground">Confirm Fleet Emergency Landing</DialogTitle>
             <DialogDescription className="text-center text-muted-foreground">
-              {selectedUAVs.length} selected UAVs will immediately descend and land at their current positions. Continue?
+              {selectedUAVs.length} selected UAV(s) will immediately descend and land at their current positions. Continue?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2 mt-4">
@@ -250,7 +255,7 @@ export function ControlPanel() {
               Cancel
             </Button>
             <Button
-              onClick={emergencyLandSelected}
+              onClick={handleEmergencyConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-bold"
             >
               Yes, Land All Selected

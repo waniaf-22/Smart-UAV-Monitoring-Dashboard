@@ -3,42 +3,19 @@ import { CheckCircle2, AlertTriangle, Clock, Download, Filter, Calendar, MapPin,
 import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-interface FlightLog {
-  id: string;
-  city: string;
-  date: string;
-  time: string;
-  duration: string;
-  distance: number;
-  efficiency: number;
-  status: "ok" | "warn";
-}
+import { useFleet } from "@/context/FleetContext";
 
-const MOCK_FLIGHTS: FlightLog[] = [
-  { id: "FL-2310", city: "Islamabad", date: "2026-04-27", time: "08:15", duration: "00:42:18", distance: 12.4, efficiency: 88, status: "ok" },
-  { id: "FL-2309", city: "Karachi", date: "2026-04-27", time: "14:30", duration: "01:05:02", distance: 18.7, efficiency: 92, status: "ok" },
-  { id: "FL-2308", city: "Lahore", date: "2026-04-26", time: "09:00", duration: "00:18:44", distance: 4.2, efficiency: 65, status: "warn" },
-  { id: "FL-2307", city: "Islamabad", date: "2026-04-26", time: "16:45", duration: "00:55:30", distance: 15.1, efficiency: 85, status: "ok" },
-  { id: "FL-2306", city: "Hyderabad", date: "2026-04-25", time: "11:20", duration: "00:09:12", distance: 1.8, efficiency: 58, status: "warn" },
-  { id: "FL-2305", city: "Larkana", date: "2026-04-25", time: "15:10", duration: "00:30:00", distance: 8.5, efficiency: 75, status: "ok" },
-  { id: "FL-2304", city: "Peshawar", date: "2026-04-24", time: "07:30", duration: "01:10:00", distance: 20.0, efficiency: 95, status: "ok" },
-  { id: "FL-2303", city: "Karachi", date: "2026-04-24", time: "19:00", duration: "00:45:00", distance: 14.0, efficiency: 82, status: "ok" },
-  { id: "FL-2302", city: "Quetta", date: "2026-04-23", time: "10:05", duration: "00:25:00", distance: 6.5, efficiency: 70, status: "ok" },
-  { id: "FL-2301", city: "Islamabad", date: "2026-04-23", time: "13:40", duration: "00:50:00", distance: 16.2, efficiency: 89, status: "ok" },
-  { id: "FL-2300", city: "Multan", date: "2026-04-22", time: "11:00", duration: "01:20:00", distance: 22.1, efficiency: 98, status: "ok" },
-  { id: "FL-2299", city: "Faisalabad", date: "2026-04-22", time: "14:15", duration: "00:15:30", distance: 3.5, efficiency: 62, status: "warn" },
-];
-
-const CITIES = ["All Cities", "Islamabad", "Karachi", "Hyderabad", "Larkana", "Lahore", "Peshawar", "Quetta", "Multan", "Faisalabad", "Rawalpindi", "Gujranwala", "Sialkot", "Bahawalpur", "Sukkur"];
+const CITIES = ["All Cities", "Karachi", "Lahore", "Islamabad", "Peshawar", "Quetta"];
 const TIME_RANGES = ["All Times", "Morning (06:00-11:59)", "Afternoon (12:00-17:59)", "Evening (18:00-23:59)", "Night (00:00-05:59)"];
 
 export function Reports() {
+  const { flightLogs, uavs } = useFleet();
   const [filterDate, setFilterDate] = useState("");
   const [filterTime, setFilterTime] = useState("All Times");
   const [filterCity, setFilterCity] = useState("All Cities");
 
   const filteredFlights = useMemo(() => {
-    return MOCK_FLIGHTS.filter((f) => {
+    return flightLogs.filter((f) => {
       let match = true;
       if (filterDate && f.date !== filterDate) match = false;
       if (filterCity !== "All Cities" && f.city !== filterCity) match = false;
@@ -67,7 +44,7 @@ export function Reports() {
   const totalFlights = filteredFlights.length;
   const totalDistance = filteredFlights.reduce((acc, f) => acc + f.distance, 0).toFixed(1);
   const avgEfficiency = totalFlights > 0 ? (filteredFlights.reduce((acc, f) => acc + f.efficiency, 0) / totalFlights).toFixed(0) : "0";
-  const incidents = filteredFlights.filter((f) => f.status === "warn").length;
+  const incidents = filteredFlights.filter((f) => f.status === "warn" || f.status === "emergency").length;
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
@@ -263,16 +240,10 @@ export function Reports() {
                         <span className="text-xs font-mono">{f.efficiency}%</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      {f.status === "ok" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[oklch(var(--success))]/10 border border-[oklch(var(--success))]/20 text-xs font-bold text-[oklch(var(--success))] uppercase tracking-wider">
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Nominal
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[oklch(var(--warning))]/10 border border-[oklch(var(--warning))]/20 text-xs font-bold text-[oklch(var(--warning))] uppercase tracking-wider">
-                          <AlertTriangle className="h-3.5 w-3.5" /> Aborted
-                        </span>
-                      )}
+                    <td className="px-4 py-3">
+                      {f.status === "ok" && <span className="inline-flex items-center gap-1 text-[oklch(var(--success))] bg-[oklch(var(--success))]/10 px-2 py-1 rounded-full text-xs font-bold"><CheckCircle2 className="w-3 h-3" /> Nominal</span>}
+                      {f.status === "warn" && <span className="inline-flex items-center gap-1 text-[oklch(var(--warning))] bg-[oklch(var(--warning))]/10 px-2 py-1 rounded-full text-xs font-bold"><AlertTriangle className="w-3 h-3" /> Warning</span>}
+                      {f.status === "emergency" && <span className="inline-flex items-center gap-1 text-destructive bg-destructive/10 px-2 py-1 rounded-full text-xs font-bold"><AlertTriangle className="w-3 h-3" /> Emergency</span>}
                     </td>
                   </tr>
                 ))
@@ -285,6 +256,46 @@ export function Reports() {
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* MAINTENANCE SECTION */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+          <Activity className="h-5 w-5 text-primary" /> Maintenance Health
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+          {uavs.map((uav) => {
+            const maintenanceThreshold = 500;
+            const hoursLeft = maintenanceThreshold - uav.flightHours;
+            const percentUsed = Math.min((uav.flightHours / maintenanceThreshold) * 100, 100);
+            
+            let statusColor = "text-emerald-500";
+            let bgBar = "bg-emerald-500";
+            if (hoursLeft < 50) {
+              statusColor = "text-destructive";
+              bgBar = "bg-destructive";
+            } else if (hoursLeft < 150) {
+              statusColor = "text-amber-500";
+              bgBar = "bg-amber-500";
+            }
+
+            return (
+              <div key={uav.id} className="border border-border rounded-xl p-4 bg-secondary/30">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="font-bold text-foreground">{uav.id}</p>
+                  <span className={`text-xs font-bold ${statusColor}`}>{uav.flightHours}h</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">{uav.city}</p>
+                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                  <div className={`h-full ${bgBar} transition-all`} style={{ width: `${percentUsed}%` }} />
+                </div>
+                <p className={`text-[10px] mt-2 font-medium ${hoursLeft < 50 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  {hoursLeft < 50 ? 'MAINTENANCE REQUIRED' : `${hoursLeft}h until next service`}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

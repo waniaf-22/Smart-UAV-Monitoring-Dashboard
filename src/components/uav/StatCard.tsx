@@ -19,9 +19,9 @@ export function StatCard({
 }) {
   const toneClass = {
     default: "text-primary",
-    warning: "text-[oklch(var(--warning))]",
+    warning: "text-amber-500",
     danger: "text-destructive",
-    success: "text-[oklch(var(--success))]",
+    success: "text-emerald-500",
   }[tone];
 
   const content = (
