@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useFleetShortcuts } from "@/hooks/useFleetShortcuts";
 import { Play, Square, Siren, Plane, Camera, Home as HomeIcon, Gamepad2, MonitorDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -71,6 +72,19 @@ export function ControlPanel() {
     toast.success(`Monitoring ${id}`, { description: "Dashboard updated to live telemetry feed." });
   };
 
+  // ── Keyboard Shortcuts (defined AFTER handlers to avoid stale closures) ─
+  // Use refs so the event listener always calls the latest function version.
+  const handlersRef = useRef({ handleStartSelected: () => {}, handleStopSelected: () => {} });
+  useEffect(() => {
+    handlersRef.current = { handleStartSelected, handleStopSelected };
+  });
+
+  useFleetShortcuts({
+    onSelectAll: toggleSelectAll,
+    onStart:     () => handlersRef.current.handleStartSelected(),
+    onStop:      () => handlersRef.current.handleStopSelected(),
+    onEmergency: () => setConfirmOpen(true),
+  });
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
       <header className="mb-4">
@@ -89,6 +103,7 @@ export function ControlPanel() {
           <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-foreground">
             <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} />
             Select All
+            <kbd className="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] font-mono rounded bg-secondary border border-border text-muted-foreground">Ctrl+A</kbd>
           </label>
           <span className="text-sm text-muted-foreground border-l border-border pl-4">
             {selectedUAVs.length} Selected
@@ -99,25 +114,28 @@ export function ControlPanel() {
           <Button
             onClick={handleStartSelected}
             disabled={selectedUAVs.length === 0 || selectedUAVs.every((u) => u.status === "running")}
-            className="h-10 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90"
+            className="h-10 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
             style={selectedUAVs.length > 0 ? { boxShadow: "var(--shadow-glow)" } : {}}
           >
-            <Play className="h-4 w-4 mr-2" /> Start Selected
+            <Play className="h-4 w-4" /> Start Selected
+            <kbd className="hidden sm:inline-flex ml-1 px-1.5 py-0.5 text-[10px] font-mono rounded bg-primary-foreground/20 text-primary-foreground/80">Ctrl+S</kbd>
           </Button>
           <Button
             onClick={handleStopSelected}
             disabled={selectedUAVs.length === 0 || selectedUAVs.every((u) => u.status === "idle")}
             variant="outline"
-            className="h-10 text-sm font-bold border-border bg-secondary text-foreground hover:bg-secondary/70"
+            className="h-10 text-sm font-bold border-border bg-secondary text-foreground hover:bg-secondary/70 gap-2"
           >
-            <Square className="h-4 w-4 mr-2" /> Stop Selected
+            <Square className="h-4 w-4" /> Stop Selected
+            <kbd className="hidden sm:inline-flex ml-1 px-1.5 py-0.5 text-[10px] font-mono rounded bg-secondary-foreground/10 text-muted-foreground">Ctrl+X</kbd>
           </Button>
           <Button
             onClick={() => setConfirmOpen(true)}
             disabled={selectedUAVs.length === 0}
-            className="h-10 text-sm font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="h-10 text-sm font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
           >
-            <Siren className="h-4 w-4 mr-2" /> Emergency Land
+            <Siren className="h-4 w-4" /> Emergency Land
+            <kbd className="hidden sm:inline-flex ml-1 px-1.5 py-0.5 text-[10px] font-mono rounded bg-destructive-foreground/20 text-destructive-foreground/80">Ctrl+E</kbd>
           </Button>
         </div>
       </div>

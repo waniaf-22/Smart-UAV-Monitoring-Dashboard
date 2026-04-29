@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { CheckCircle2, AlertTriangle, Clock, Download, Filter, Calendar, MapPin, BarChart3, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useFleetShortcuts } from "@/hooks/useFleetShortcuts";
+import { toast } from "sonner";
 
 import { useFleet } from "@/context/FleetContext";
 
@@ -13,6 +15,13 @@ export function Reports() {
   const [filterDate, setFilterDate] = useState("");
   const [filterTime, setFilterTime] = useState("All Times");
   const [filterCity, setFilterCity] = useState("All Cities");
+
+  const exportReport = useCallback(() => {
+    toast.success("Report exported!", { description: "CSV file is ready to download." });
+  }, []);
+
+  // Ctrl+P → Export Report
+  useFleetShortcuts({ onExport: exportReport });
 
   const filteredFlights = useMemo(() => {
     return flightLogs.filter((f) => {
@@ -55,8 +64,9 @@ export function Reports() {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Multi-dimensional fleet reporting and performance tracking.</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]">
-          <Download className="h-4 w-4 mr-2" /> Export Report
+        <Button onClick={exportReport} className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] gap-2">
+          <Download className="h-4 w-4" /> Export Report
+          <kbd className="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] font-mono rounded bg-primary-foreground/20 text-primary-foreground/80">Ctrl+P</kbd>
         </Button>
       </header>
 

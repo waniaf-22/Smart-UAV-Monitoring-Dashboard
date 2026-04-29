@@ -8,9 +8,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+const VALID_USERNAME = "wania_fatima";
+const VALID_PASSWORD = "1231223";
+
 export function LoginScreen() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("operator");
+  const [username, setUsername] = useState("wania_fatima");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   
@@ -24,6 +27,9 @@ export function LoginScreen() {
     if (!username) {
       setUsernameError("Username is required");
       hasError = true;
+    } else if (username !== VALID_USERNAME) {
+      setUsernameError("Username not recognised");
+      hasError = true;
     } else {
       setUsernameError("");
     }
@@ -31,13 +37,16 @@ export function LoginScreen() {
     if (!password) {
       setPasswordError("Password is required");
       hasError = true;
+    } else if (password !== VALID_PASSWORD) {
+      setPasswordError("Incorrect password");
+      hasError = true;
     } else {
       setPasswordError("");
     }
 
     if (hasError) return;
 
-    toast.success("Authenticated. Welcome, Operator.");
+    toast.success("Authenticated. Welcome, Wania Fatima.");
     navigate({ to: "/dashboard" });
   };
 
@@ -140,6 +149,45 @@ export function LoginScreen() {
               Create Account
             </Link>
           </p>
+        </div>
+
+        {/* Credentials hint */}
+        <div
+          className="mt-5 rounded-xl border px-5 py-4 text-sm"
+          style={{
+            borderColor: "oklch(0.7 0.22 38 / 0.4)",
+            background: "oklch(0.32 0.12 30 / 0.25)",
+            backdropFilter: "blur(8px)",
+            boxShadow: "0 0 24px oklch(0.7 0.22 38 / 0.15)",
+          }}
+        >
+          <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3 flex items-center gap-2">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            Demo Credentials
+          </p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-xs">Username</span>
+              <code
+                className="text-xs font-mono text-foreground bg-secondary/60 px-2 py-0.5 rounded cursor-pointer select-all border border-border"
+                onClick={() => setUsername(VALID_USERNAME)}
+                title="Click to auto-fill"
+              >
+                {VALID_USERNAME}
+              </code>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-xs">Password</span>
+              <code
+                className="text-xs font-mono text-foreground bg-secondary/60 px-2 py-0.5 rounded cursor-pointer select-all border border-border"
+                onClick={() => setPassword(VALID_PASSWORD)}
+                title="Click to auto-fill"
+              >
+                {VALID_PASSWORD}
+              </code>
+            </div>
+            <p className="text-[10px] text-muted-foreground/60 mt-1 text-right">Click a value to auto-fill the field</p>
+          </div>
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-6">

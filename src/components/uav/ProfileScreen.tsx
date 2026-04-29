@@ -57,10 +57,10 @@ export function ProfileScreen() {
 
   // Account
   const [form, setForm] = useState({
-    fullName: "Operator Alpha",
-    username: "alpha_cmd",
-    email: "alpha@aerocommand.mil",
-    operatorId: "OPS-7782",
+    fullName: "Wania Fatima",
+    username: "wania_fatima",
+    email: "wania.fatima@aerocommand.mil",
+    operatorId: "OPS-9932",
     phone: "+92-300-1234567",
     currentPassword: "",
     newPassword: "",
@@ -118,7 +118,7 @@ export function ProfileScreen() {
           <div className="relative shrink-0">
             <div className="h-24 w-24 md:h-28 md:w-28 rounded-2xl flex items-center justify-center text-4xl font-black text-primary-foreground border-2"
               style={{ background: "linear-gradient(135deg, oklch(0.7 0.22 38), oklch(0.55 0.2 30))", borderColor: "oklch(0.7 0.22 38)", boxShadow: "0 0 30px oklch(0.7 0.22 38 / 0.5)" }}>
-              A
+              W
             </div>
             <button className="absolute -bottom-2 -right-2 h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors cursor-pointer">
               <Camera className="h-3.5 w-3.5 text-muted-foreground" />
