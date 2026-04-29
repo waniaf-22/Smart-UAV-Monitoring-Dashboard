@@ -43,7 +43,7 @@ export function WeatherAlert() {
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">Real-time meteorological monitoring and fleet safety control. • <span className="text-destructive font-medium">{activeUav.city} Sector</span></p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-secondary/50 px-4 py-2 rounded-full border border-border">
+        <div className="flex items-center gap-2 text-sm font-semibold text-destructive bg-destructive/10 px-4 py-2 rounded-full border border-destructive/30">
           <div className="w-2 h-2 rounded-full bg-destructive animate-pulse"></div>
           Active Severe Weather Warning
         </div>
@@ -67,13 +67,13 @@ export function WeatherAlert() {
               background: "oklch(0.62 0.24 25)",
               boxShadow: "0 0 60px oklch(0.62 0.24 25 / 0.8)",
             }}>
-            <CloudLightning className="h-12 w-12 text-foreground animate-pulse" />
+            <CloudLightning className="h-12 w-12 text-white animate-pulse" />
           </div>
           <div className="text-center md:text-left">
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-[oklch(var(--warning))] mb-2">Critical Weather Alert</p>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-3">SEVERE THUNDERSTORM</h2>
-            <p className="text-lg text-foreground/90 max-w-2xl">
-              Microburst moving SE at <span className="font-bold text-[oklch(var(--warning))]">55 km/h</span> detected. Heavy rain core will reach the {activeUav.city} sector in <span className="font-bold text-destructive">{dashboardState.stormEtaSeconds > 0 ? dashboardState.stormEtaSeconds : 0} seconds</span>.
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-500 mb-2">Critical Weather Alert</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-3">SEVERE THUNDERSTORM</h2>
+            <p className="text-lg text-white/90 max-w-2xl">
+              Microburst moving SE at <span className="font-bold text-amber-400">{dashboardState.stormEtaSeconds > 0 ? Math.round(dashboardState.stormEtaSeconds) : "—"} km/h</span> detected. Heavy rain core will reach the {activeUav.city} sector in <span className="font-bold text-red-400">{dashboardState.stormEtaSeconds > 0 ? dashboardState.stormEtaSeconds : 0} seconds</span>.
             </p>
           </div>
         </div>
@@ -136,10 +136,10 @@ export function WeatherAlert() {
             </div>
           </div>
           
-          <div className="col-span-2 md:col-span-2 bg-secondary border border-border rounded-xl p-5 flex items-center justify-between">
+          <div className="col-span-2 md:col-span-2 bg-warning/10 border border-warning/30 rounded-xl p-5 flex items-center justify-between">
              <div>
                <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-1">
-                 <ShieldAlert className="h-4 w-4 text-[oklch(var(--warning))]" /> Automated Flight Advisory
+                 <ShieldAlert className="h-4 w-4 text-warning" /> Automated Flight Advisory
                </h3>
                <p className="text-xs text-muted-foreground">High wind sheer detected. RTH may be compromised. Recommended immediate local grounding or evasion maneuvers.</p>
              </div>
@@ -188,7 +188,7 @@ export function WeatherAlert() {
                 <ArrowDownToLine className="h-4 w-4 mr-2" />
                 Evade & Land Affected Fleet
               </Button>
-              <Button onClick={handleAcknowledge} variant="outline" className="w-full h-12 font-bold border-border bg-secondary text-foreground hover:bg-secondary/80">
+              <Button onClick={handleAcknowledge} variant="outline" className="w-full h-12 font-bold border-border bg-card text-foreground hover:bg-secondary/50">
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Acknowledge Warning
               </Button>

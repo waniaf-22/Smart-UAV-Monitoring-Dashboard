@@ -182,12 +182,12 @@ export function Reports() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Average Efficiency</p>
-                <p className="text-3xl font-bold text-[oklch(var(--success))]">{avgEfficiency}%</p>
+                <p className="text-3xl font-bold text-success">{avgEfficiency}%</p>
               </div>
               <div className="pt-4 border-t border-border">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Aborted / Warn</span>
-                  <span className={`text-lg font-bold ${incidents > 0 ? 'text-[oklch(var(--warning))]' : 'text-[oklch(var(--success))]'}`}>
+                  <span className={`text-lg font-bold ${incidents > 0 ? 'text-warning' : 'text-success'}`}>
                     {incidents}
                   </span>
                 </div>
@@ -241,8 +241,8 @@ export function Reports() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      {f.status === "ok" && <span className="inline-flex items-center gap-1 text-[oklch(var(--success))] bg-[oklch(var(--success))]/10 px-2 py-1 rounded-full text-xs font-bold"><CheckCircle2 className="w-3 h-3" /> Nominal</span>}
-                      {f.status === "warn" && <span className="inline-flex items-center gap-1 text-[oklch(var(--warning))] bg-[oklch(var(--warning))]/10 px-2 py-1 rounded-full text-xs font-bold"><AlertTriangle className="w-3 h-3" /> Warning</span>}
+                      {f.status === "ok" && <span className="inline-flex items-center gap-1 text-success bg-success/10 px-2 py-1 rounded-full text-xs font-bold"><CheckCircle2 className="w-3 h-3" /> Nominal</span>}
+                      {f.status === "warn" && <span className="inline-flex items-center gap-1 text-warning bg-warning/10 px-2 py-1 rounded-full text-xs font-bold"><AlertTriangle className="w-3 h-3" /> Warning</span>}
                       {f.status === "emergency" && <span className="inline-flex items-center gap-1 text-destructive bg-destructive/10 px-2 py-1 rounded-full text-xs font-bold"><AlertTriangle className="w-3 h-3" /> Emergency</span>}
                     </td>
                   </tr>
@@ -270,14 +270,14 @@ export function Reports() {
             const hoursLeft = maintenanceThreshold - uav.flightHours;
             const percentUsed = Math.min((uav.flightHours / maintenanceThreshold) * 100, 100);
             
-            let statusColor = "text-emerald-500";
-            let bgBar = "bg-emerald-500";
+            let statusColor = "text-success";
+            let bgBar = "bg-success";
             if (hoursLeft < 50) {
               statusColor = "text-destructive";
               bgBar = "bg-destructive";
             } else if (hoursLeft < 150) {
-              statusColor = "text-amber-500";
-              bgBar = "bg-amber-500";
+              statusColor = "text-warning";
+              bgBar = "bg-warning";
             }
 
             return (

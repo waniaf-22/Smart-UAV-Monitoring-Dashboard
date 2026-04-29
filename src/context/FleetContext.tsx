@@ -133,6 +133,13 @@ export function FleetProvider({ children }: { children: ReactNode }) {
     scheduleIdle(id);
   };
 
+  /** Instantly forces a drone to idle (e.g. after evasion lands it) */
+  const forceIdleSingle = (id: string, lat?: number, lng?: number) => {
+    setUavs((prev) =>
+      prev.map((u) => (u.id === id ? { ...u, status: "idle", landingMode: null, emergencyLat: lat, emergencyLng: lng } : u))
+    );
+  };
+
   const startSelected = () =>
     setUavs((prev) =>
       prev.map((u) =>
@@ -187,6 +194,7 @@ export function FleetProvider({ children }: { children: ReactNode }) {
         toggleSelectAll,
         setStatusSingle,
         emergencyLandSingle,
+        forceIdleSingle,
         startSelected,
         stopSelected,
         emergencyLandSelected,

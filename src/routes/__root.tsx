@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { FleetProvider } from "@/context/FleetContext";
+import { SettingsProvider } from "@/context/SettingsContext";
 
 import appCss from "../styles.css?url";
 
@@ -31,8 +32,8 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "AeroCommand Fleet" },
+      { name: "description", content: "Advanced UAV Fleet Management System" },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Lovable App" },
       { property: "og:description", content: "Lovable Generated Project" },
@@ -41,6 +42,19 @@ export const Route = createRootRoute({
       { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+      },
       {
         rel: "stylesheet",
         href: appCss,
@@ -63,7 +77,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         <TooltipProvider>
           {children}
-          <Toaster theme="dark" position="top-right" />
         </TooltipProvider>
         <Scripts />
       </body>
@@ -71,10 +84,24 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { useSettings } from "@/context/SettingsContext";
+
+function RootApp() {
+  const { theme } = useSettings();
+  return (
+    <>
+      <FleetProvider>
+        <Outlet />
+      </FleetProvider>
+      <Toaster theme={theme === "system" ? "system" : theme} position="top-right" />
+    </>
+  );
+}
+
 function RootComponent() {
   return (
-    <FleetProvider>
-      <Outlet />
-    </FleetProvider>
+    <SettingsProvider>
+      <RootApp />
+    </SettingsProvider>
   );
 }

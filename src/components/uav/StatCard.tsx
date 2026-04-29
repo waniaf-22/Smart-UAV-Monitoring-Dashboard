@@ -24,9 +24,23 @@ export function StatCard({
     success: "text-emerald-500",
   }[tone];
 
+  const borderClass = {
+    default: "border-border",
+    warning: "border-amber-500/50",
+    danger: "border-destructive/50",
+    success: "border-emerald-500/30",
+  }[tone];
+
+  const iconBgClass = {
+    default: "bg-secondary",
+    warning: "bg-amber-500/10",
+    danger: "bg-destructive/10",
+    success: "bg-emerald-500/10",
+  }[tone];
+
   const content = (
-    <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
-      <div className={cn("h-11 w-11 rounded-lg bg-secondary flex items-center justify-center", toneClass)}>
+    <div className={cn("bg-card border rounded-xl p-4 flex items-center gap-4 transition-colors", borderClass)}>
+      <div className={cn("h-11 w-11 rounded-lg flex items-center justify-center transition-colors", iconBgClass, toneClass)}>
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Play, Square, Siren, Plane, Camera, Home as HomeIcon, Gamepad2, MonitorDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useSettings } from "@/context/SettingsContext";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ export function ControlPanel() {
     emergencyLandSelected,
   } = useFleet();
 
+  const { dashboardLayout } = useSettings();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const selectedUAVs = uavs.filter((u) => u.selected);
@@ -120,15 +122,15 @@ export function ControlPanel() {
         </div>
       </div>
 
-      {/* UAV List */}
-      <div className="flex flex-col gap-3">
+      {/* UAV List / Grid */}
+      <div className={dashboardLayout === "Grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-3"}>
         {uavs.map((uav) => {
           const badge    = badgeStyles[uav.status];
           const isActive = uav.id === activeUavId;
           return (
             <div
               key={uav.id}
-              className={`bg-card border rounded-xl p-3 flex flex-col sm:flex-row items-center gap-4 relative transition-all duration-300 ${
+              className={`bg-card border rounded-xl p-3 flex ${dashboardLayout === "Grid" ? "flex-col items-start" : "flex-col sm:flex-row items-center"} gap-4 relative transition-all duration-300 ${
                 uav.selected ? "border-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]" : "border-border"
               }`}
             >
@@ -179,8 +181,8 @@ export function ControlPanel() {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
-                <div className="flex gap-2 flex-1 sm:flex-none">
+              <div className={`flex items-center gap-2 shrink-0 ${dashboardLayout === "Grid" ? "w-full mt-auto pt-2 border-t border-border" : "w-full sm:w-auto justify-between sm:justify-end"}`}>
+                <div className={`flex gap-2 ${dashboardLayout === "Grid" ? "flex-1" : "flex-1 sm:flex-none"}`}>
                   <Button
                     onClick={() => handleStatusSingle(uav.id, "running")}
                     disabled={uav.status === "running"}
@@ -218,10 +220,10 @@ export function ControlPanel() {
                   <button
                     onClick={() => handleMonitor(uav.id)}
                     title="Monitor live telemetry on Dashboard"
-                    className={`h-8 px-2 rounded flex items-center gap-1 text-xs font-semibold transition-all ${
+                    className={`h-8 min-w-[90px] ml-1 rounded flex items-center justify-center text-xs font-bold transition-colors ${
                       isActive
-                        ? "bg-primary/20 text-primary border border-primary/40"
-                        : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                        ? "bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground border border-transparent"
                     }`}
                   >
                     <MonitorDot className="h-4 w-4" />

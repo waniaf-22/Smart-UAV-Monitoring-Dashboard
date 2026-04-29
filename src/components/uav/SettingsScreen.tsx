@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useSettings } from "@/context/SettingsContext";
 
 type Tab = "account" | "settings";
 
@@ -53,17 +54,18 @@ function SelectGroup({ options, value, onChange }: { options: string[]; value: s
 }
 
 export function SettingsScreen() {
-  // Settings state
-  const [theme, setTheme] = useState<"dark" | "light" | "system">("dark");
-  const [speedUnit, setSpeedUnit] = useState("km/h");
-  const [distUnit, setDistUnit] = useState("meters");
-  const [tempUnit, setTempUnit] = useState("°C");
-  const [altUnit, setAltUnit] = useState("meters");
-  const [mapStyle, setMapStyle] = useState("Satellite");
-  const [telemetryRate, setTelemetryRate] = useState("5 Hz");
-  const [emergencyProtocol, setEmergencyProtocol] = useState("rth");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [dashboardLayout, setDashboardLayout] = useState("List");
+  const {
+    theme, setTheme,
+    speedUnit, setSpeedUnit,
+    distUnit, setDistUnit,
+    tempUnit, setTempUnit,
+    altUnit, setAltUnit,
+    mapStyle, setMapStyle,
+    telemetryRate, setTelemetryRate,
+    emergencyProtocol, setEmergencyProtocol,
+    sidebarCollapsed, setSidebarCollapsed,
+    dashboardLayout, setDashboardLayout
+  } = useSettings();
 
   const [notifications, setNotifications] = useState({
     audio: true,
@@ -92,7 +94,7 @@ export function SettingsScreen() {
           {/* Appearance */}
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-6 pb-4 border-b border-border">
-              <Palette className="h-4 w-4 text-primary" /> Appearance
+              <Palette className="h-4 w-4 text-blue-500" /> Appearance
             </h2>
             <div className="space-y-6">
               <div>
@@ -126,7 +128,7 @@ export function SettingsScreen() {
           {/* Units */}
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-6 pb-4 border-b border-border">
-              <Ruler className="h-4 w-4 text-primary" /> Measurement Units
+              <Ruler className="h-4 w-4 text-emerald-500" /> Measurement Units
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -151,7 +153,7 @@ export function SettingsScreen() {
           {/* Map */}
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-6 pb-4 border-b border-border">
-              <Map className="h-4 w-4 text-primary" /> Map & Display
+              <Map className="h-4 w-4 text-amber-500" /> Map & Display
             </h2>
             <div className="space-y-4">
               <div>
@@ -170,7 +172,7 @@ export function SettingsScreen() {
           {/* Notifications */}
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-6 pb-4 border-b border-border">
-              <Bell className="h-4 w-4 text-primary" /> Notifications
+              <Bell className="h-4 w-4 text-purple-500" /> Notifications
             </h2>
             <div className="space-y-3">
               <SettingRow title="Critical Audio Alerts" desc="Play warning sounds for emergency landings and wind alerts.">
@@ -197,7 +199,7 @@ export function SettingsScreen() {
           {/* Advanced Operations */}
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-6 pb-4 border-b border-border">
-              <Activity className="h-4 w-4 text-primary" /> Advanced Operations
+              <Activity className="h-4 w-4 text-red-500" /> Advanced Operations
             </h2>
             <div className="space-y-6">
               <div>

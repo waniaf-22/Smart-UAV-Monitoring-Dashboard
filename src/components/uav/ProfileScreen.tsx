@@ -108,7 +108,7 @@ export function ProfileScreen() {
   return (
     <div className="min-h-full p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       {/* ── Hero Header ── */}
-      <div className="relative rounded-2xl overflow-hidden border border-border" style={{ background: "linear-gradient(135deg, oklch(0.25 0.06 250) 0%, oklch(0.18 0.04 250) 100%)" }}>
+      <div className="relative rounded-2xl overflow-hidden border border-border bg-card shadow-sm">
         {/* Decorative rings */}
         <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full opacity-10" style={{ background: "radial-gradient(circle, oklch(0.7 0.22 38), transparent 70%)" }} />
         <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full opacity-5" style={{ background: "radial-gradient(circle, oklch(0.7 0.22 38), transparent 70%)" }} />
@@ -120,7 +120,7 @@ export function ProfileScreen() {
               style={{ background: "linear-gradient(135deg, oklch(0.7 0.22 38), oklch(0.55 0.2 30))", borderColor: "oklch(0.7 0.22 38)", boxShadow: "0 0 30px oklch(0.7 0.22 38 / 0.5)" }}>
               A
             </div>
-            <button className="absolute -bottom-2 -right-2 h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center hover:bg-secondary transition-colors">
+            <button className="absolute -bottom-2 -right-2 h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors cursor-pointer">
               <Camera className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </div>
@@ -132,39 +132,21 @@ export function ProfileScreen() {
             <p className="text-muted-foreground text-sm mt-1">@{form.username} &nbsp;·&nbsp; {form.email}</p>
             <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-4">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 border border-primary/30 text-primary">{form.operatorId}</span>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-secondary border border-border text-muted-foreground">14 UAVs Managed</span>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-secondary border border-border text-muted-foreground">127 Missions</span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-muted border border-border text-foreground">14 UAVs Managed</span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-muted border border-border text-foreground">127 Missions</span>
             </div>
           </div>
 
           <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-secondary/50 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-card text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               <LogOut className="h-4 w-4" /> Sign Out
             </button>
           </div>
         </div>
-
-        {/* Tab Bar */}
-        <div className="border-t border-border px-6 md:px-10 flex gap-1">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
-                activeTab === id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Icon className="h-4 w-4" /> {label}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* ── ACCOUNT TAB ── */}
-      {activeTab === "account" && (
-        <form onSubmit={handleSaveAccount} className="space-y-6">
+      <form onSubmit={handleSaveAccount} className="space-y-6">
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-6 pb-4 border-b border-border">
               <User className="h-4 w-4 text-primary" /> Personal Information
@@ -225,7 +207,6 @@ export function ProfileScreen() {
             </Button>
           </div>
         </form>
-      )}
 
     </div>
   );

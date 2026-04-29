@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Battery, Gauge, MountainSnow, Wind, Satellite, Signal, Plane, Layers, CloudRain, AlertTriangle, Clock, Activity, Radio, Wifi, Video, CheckCircle2, Thermometer, Droplets, Eye, Gauge as GaugeIcon, MonitorDot, Siren, Home, ShieldAlert, TriangleAlert, LocateFixed, CloudLightning } from "lucide-react";
+import { Battery, Gauge, MountainSnow, Wind, Satellite, Signal, Plane, Layers, CloudRain, AlertTriangle, Clock, Activity, Radio, Wifi, Video, CheckCircle2, Thermometer, Droplets, Eye, Gauge as GaugeIcon, MonitorDot, Siren, Home, ShieldAlert, TriangleAlert, LocateFixed, CloudLightning, ArrowDownToLine } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { StatCard } from "./StatCard";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
@@ -7,6 +7,12 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useFleet } from "@/context/FleetContext";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -19,19 +25,19 @@ import { toast } from "sonner";
 
 // Satellite-mode icons
 const uavIconSat = L.divIcon({
-  html: `<div style="background-color: #10b981; border: 2.5px solid white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.6);"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L2.5 8.5L8 12l-4 4-2.5-.5-1.5 1.5L4 20l3-4 4-4 3.5 5.5 1.7-1.3z"/></svg></div>`,
+  html: `<div style="background-color: #10b981; border: 2.5px solid white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.6);"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M21,16V14L13,9V3.5C13,2.67 12.33,2 11.5,2C10.67,2 10,2.67 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z"/></svg></div>`,
   className: '',
   iconSize: [32, 32],
   iconAnchor: [16, 16],
 });
 const uavIconIdleSat = L.divIcon({
-  html: `<div style="background-color: #ef4444; border: 2.5px solid white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.6);"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L2.5 8.5L8 12l-4 4-2.5-.5-1.5 1.5L4 20l3-4 4-4 3.5 5.5 1.7-1.3z"/></svg></div>`,
+  html: `<div style="background-color: #ef4444; border: 2.5px solid white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.6);"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M21,16V14L13,9V3.5C13,2.67 12.33,2 11.5,2C10.67,2 10,2.67 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z"/></svg></div>`,
   className: '',
   iconSize: [32, 32],
   iconAnchor: [16, 16],
 });
 const uavIconLandingSat = L.divIcon({
-  html: `<div style="background-color: #f59e0b; border: 2.5px solid white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.6);"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L2.5 8.5L8 12l-4 4-2.5-.5-1.5 1.5L4 20l3-4 4-4 3.5 5.5 1.7-1.3z"/></svg></div>`,
+  html: `<div style="background-color: #f59e0b; border: 2.5px solid white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.6);"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M21,16V14L13,9V3.5C13,2.67 12.33,2 11.5,2C10.67,2 10,2.67 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z"/></svg></div>`,
   className: '',
   iconSize: [32, 32],
   iconAnchor: [16, 16],
@@ -39,22 +45,22 @@ const uavIconLandingSat = L.divIcon({
 
 // Weather-mode icons
 const uavIconWeather = L.divIcon({
-  html: `<div style="display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px #10b981) drop-shadow(0 0 12px #10b981);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L2.5 8.5L8 12l-4 4-2.5-.5-1.5 1.5L4 20l3-4 4-4 3.5 5.5 1.7-1.3z"/></svg></div>`,
+  html: `<div style="display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px #10b981) drop-shadow(0 0 12px #10b981);"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#10b981" stroke="none"><path d="M21,16V14L13,9V3.5C13,2.67 12.33,2 11.5,2C10.67,2 10,2.67 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z"/></svg></div>`,
   className: '',
-  iconSize: [28, 28],
-  iconAnchor: [14, 14],
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 const uavIconIdleWeather = L.divIcon({
-  html: `<div style="display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px #ef4444) drop-shadow(0 0 12px #ef4444);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L2.5 8.5L8 12l-4 4-2.5-.5-1.5 1.5L4 20l3-4 4-4 3.5 5.5 1.7-1.3z"/></svg></div>`,
+  html: `<div style="display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px #ef4444) drop-shadow(0 0 12px #ef4444);"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#ef4444" stroke="none"><path d="M21,16V14L13,9V3.5C13,2.67 12.33,2 11.5,2C10.67,2 10,2.67 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z"/></svg></div>`,
   className: '',
-  iconSize: [28, 28],
-  iconAnchor: [14, 14],
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 const uavIconLandingWeather = L.divIcon({
-  html: `<div style="display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px #f59e0b) drop-shadow(0 0 12px #f59e0b);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L2.5 8.5L8 12l-4 4-2.5-.5-1.5 1.5L4 20l3-4 4-4 3.5 5.5 1.7-1.3z"/></svg></div>`,
+  html: `<div style="display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px #f59e0b) drop-shadow(0 0 12px #f59e0b);"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><path d="M21,16V14L13,9V3.5C13,2.67 12.33,2 11.5,2C10.67,2 10,2.67 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z"/></svg></div>`,
   className: '',
-  iconSize: [28, 28],
-  iconAnchor: [14, 14],
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 const stormIcon = L.divIcon({
@@ -70,7 +76,7 @@ const baseIconSat = L.divIcon({
   iconAnchor: [16, 32],
 });
 const baseIconWeather = L.divIcon({
-  html: `<div style="display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px #3b82f6) drop-shadow(0 0 12px #3b82f6);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>`,
+  html: `<div style="display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px #3b82f6) drop-shadow(0 0 12px #3b82f6);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#3b82f6" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" fill="#0f172a" r="3"/></svg></div>`,
   className: '',
   iconSize: [28, 28],
   iconAnchor: [14, 28],
@@ -85,6 +91,8 @@ const MISSION_EVENTS = [
 ];
 
 // ── Global Dashboard State (persists across page navigations) ───────────────
+export type ScenarioId = "default" | "rth" | "land" | "evade" | "battery";
+
 export const dashboardState = {
   tick: 0,
   mapMode: "weather" as "satellite" | "weather",
@@ -105,10 +113,33 @@ export const dashboardState = {
   landingStartTick: 0,
   prevStatus: null as string | null,
   prevUavId: null as string | null,
+  activeScenario: "default" as ScenarioId,
+  batteryOverride: null as number | null,
+};
+
+// Scenario-specific storm parameters
+// Offsets are from BASE lat/lng. UAV orbits base at ~500m (0.0045 deg).
+// Alert fires when storm's outer edge (1600m) is ≤10s away from UAV.
+const SCENARIO_STORM: Record<ScenarioId, { offsetLat: number; offsetLng: number; speedMult: number; labelKmh: number } | null> = {
+  default: null,
+  // RTH: ~2.0 km from base, slow (0.65×). Alert ~15s after activation.
+  // etaHeavy ≈90s — enough time for RTH (rthS~43s + SAFETY 20s = 63s < 90s).
+  rth:     { offsetLat:  0.012, offsetLng: -0.013, speedMult: 0.65, labelKmh: 36 },
+  // Land: ~2.0 km from base, fast (1.2×). Alert fires within ~5s.
+  // etaHeavy ≈35s — RTH unsafe (63s > 35s), but land-in-place is safe (30s ≤ 35s).
+  land:    { offsetLat:  0.013, offsetLng: -0.014, speedMult: 1.20, labelKmh: 66 },
+  // Evade: ~2.1 km from base, very fast (1.5×). Alert fires within ~3s.
+  // Storm is visually close (near outer green circle) but NOT on the UAV.
+  // etaHeavy ≈25s — both RTH and land blocked (30s > 25s), evasion required.
+  evade:   { offsetLat:  0.010, offsetLng: -0.012, speedMult: 1.50, labelKmh: 83 },
+  battery: null,
 };
 
 export function Dashboard() {
-  const { activeUav, activeUavId, setStatusSingle, emergencyLandSingle } = useFleet();
+  const { activeUav, activeUavId, setStatusSingle, forceIdleSingle } = useFleet();
+  const [activeScenario, setActiveScenario] = useState<ScenarioId>(dashboardState.activeScenario);
+  // Tracks the tick at which the current scenario was activated so storm always starts at correct distance
+  const scenarioStartTickRef = useRef(0);
 
   // Derive map centre from the active UAV coordinates
   const baseLat = activeUav.lat;
@@ -224,13 +255,14 @@ export function Dashboard() {
     speed = 0;
   } else if (activeUav.status === "running") {
     if (isEvading) {
-      // Move away from storm at 100 km/h
+      // Move away from storm and descend simultaneously
+      const evadeProgress = Math.min(1, (tick - evadeStartTickRef.current) / EVADE_DURATION_TICKS);
       const EVADE_SPD = 100 / 3.6 / 111000; // deg/s
-      const elapsed = Math.min(tick - evadeStartTickRef.current, EVADE_DURATION_TICKS) * 1.5;
+      const elapsed = evadeProgress * EVADE_DURATION_TICKS * 1.5;
       uavLat = evadeStartPosRef.current.lat + evadeDirRef.current.dlat * EVADE_SPD * elapsed;
       uavLng = evadeStartPosRef.current.lng + evadeDirRef.current.dlng * EVADE_SPD * elapsed;
-      altitude = 130;
-      speed = 100;
+      altitude = Math.max(0, Math.round(130 * (1 - evadeProgress)));
+      speed = Math.max(0, Math.round(100 * (1 - evadeProgress)));
     } else {
       uavLat = runLat;
       uavLng = runLng;
@@ -299,8 +331,11 @@ export function Dashboard() {
     }
   }, [activeUavId]);
 
-  // battery is status-aware (idle = full, flying = draining)
-  const battery = activeUav.status === "idle" ? 100 : 78 - (tick % 6);
+  // battery: scenario 4 injects at 25% and drains naturally ~1%/5-ticks toward 20%
+  const rawBattery = activeUav.status === "idle" ? 100 : 78 - (tick % 6);
+  const battery = activeScenario === "battery"
+    ? Math.max(15, 25 - Math.floor(tick / 5))
+    : rawBattery;
   useEffect(() => {
     if (battery < 20 && !batteryAlertFiredRef.current && activeUav.status === "running") {
       batteryAlertFiredRef.current = true;
@@ -309,63 +344,66 @@ export function Dashboard() {
   }, [battery, activeUav.status]);
 
   // ── Storm Threat Assessment ────────────────────────────────────────────────
+  // Resolve storm offsets — scenario presets override the default
+  const scenParams = SCENARIO_STORM[activeScenario];
+  const stormOffLat  = scenParams?.offsetLat  ?? 0.0121;
+  const stormOffLng  = scenParams?.offsetLng  ?? -0.0134;
+  const stormSpdMult = scenParams?.speedMult  ?? 1.0;
+  const stormLabelKmh = scenParams?.labelKmh  ?? 55;
+
   useEffect(() => {
     if (activeUav.status !== "running" || stormAlertFiredRef.current || isEvading) return;
+    if (activeScenario === "battery") return; // no storm in battery scenario
     const R = 111000;
     const cosLat = Math.cos(baseLat * Math.PI / 180);
-    // Recompute storm position from tick (avoids stale closure)
-    const sLat = baseLat + 0.0121 - tick * 0.00014;
-    const sLng = baseLng - 0.0134 + tick * 0.00016;
-    // Storm velocity in m/s (SE direction, ~15 m/s = 54 km/h)
-    const svLat = -0.00014 / 1.5 * R;
-    const svLng =  0.00016 / 1.5 * R * cosLat;
-    // Current UAV orbit position
+    // Use tickSinceScenario so storm position matches what's drawn on the map
+    const tss = tick - scenarioStartTickRef.current;
+    const sLat = baseLat + stormOffLat  - tss * 0.00014 * stormSpdMult;
+    const sLng = baseLng + stormOffLng  + tss * 0.00016 * stormSpdMult;
+    const svLat = -0.00014 / 1.5 * R * stormSpdMult;
+    const svLng =  0.00016 / 1.5 * R * cosLat * stormSpdMult;
     const cLat = baseLat + Math.sin(tick / 8) * 0.0045;
     const cLng = baseLng + Math.cos(tick / 8) * 0.0045;
-    // Vector from storm to UAV (m)
     const dLat = (cLat - sLat) * R;
     const dLng = (cLng - sLng) * R * cosLat;
     const dist = Math.sqrt(dLat * dLat + dLng * dLng);
-    const outerRadius = 1600; // m (green circle)
-    const heavyRainRadius = 800; // m (red circle)
+    const outerRadius = 1600;
+    const heavyRainRadius = 800;
     const gapOuter = Math.max(0, dist - outerRadius);
     const gapHeavy = Math.max(0, dist - heavyRainRadius);
-    if (gapOuter === 0 && tick === 0) return; // Let it run a bit
-    // How fast is storm closing on UAV?
+    if (gapOuter === 0 && tss === 0) return;
     const uLat = dLat / dist, uLng = dLng / dist;
-    const approach = (svLat * uLat + svLng * uLng); // positive = approaching
-    if (approach <= 0) return; // storm moving away
+    const approach = (svLat * uLat + svLng * uLng);
+    if (approach <= 0) return;
     const etaOuter = gapOuter / approach;
-    if (etaOuter > 10) return; // wait until exactly 10s away from OUTER edge
-    
+    if (etaOuter > 10) return;
     const etaHeavy = gapHeavy / approach;
-    
-    // Decision logic based on heavy rain
     const distBase = Math.sqrt(((cLat - baseLat) * R) ** 2 + ((cLng - baseLng) * R * cosLat) ** 2);
-    const rthS = distBase / (42 / 3.6); // time to RTH at cruise speed
+    const rthS = distBase / (42 / 3.6);
     const SAFETY = 20;
     let rec: "rth" | "land" | "evade";
-    if (rthS + SAFETY <= etaHeavy)      rec = "rth";
+    if (activeScenario === "rth")        rec = "rth";
+    else if (activeScenario === "land")  rec = "land";
+    else if (activeScenario === "evade") rec = "evade";
+    else if (rthS + SAFETY <= etaHeavy) rec = "rth";
     else if (10 + SAFETY <= etaHeavy)   rec = "land";
     else                                rec = "evade";
     stormAlertFiredRef.current = true;
     setStormEtaSeconds(Math.round(etaHeavy));
     setStormRecommendation(rec);
     setStormAlertOpen(true);
-  }, [tick, isEvading, activeUav.status]);
+  }, [tick, isEvading, activeUav.status, activeScenario, stormOffLat, stormOffLng, stormSpdMult]);
 
   // ── Evade auto-land when evasion distance covered ─────────────────────────
   useEffect(() => {
-    if (!isEvading || activeUav.status !== "running") return;
-    const elapsed = tick - evadeStartTickRef.current;
-    if (elapsed < EVADE_DURATION_TICKS) return;
-    const EVADE_SPD = 100 / 3.6 / 111000;
-    const sec = elapsed * 1.5;
-    const finalLat = evadeStartPosRef.current.lat + evadeDirRef.current.dlat * EVADE_SPD * sec;
-    const finalLng = evadeStartPosRef.current.lng + evadeDirRef.current.dlng * EVADE_SPD * sec;
-    setIsEvading(false);
-    emergencyLandSingle(activeUav.id, finalLat, finalLng);
-  }, [tick, isEvading, activeUav.status]);
+    if (isEvading) {
+      if (tick - evadeStartTickRef.current >= EVADE_DURATION_TICKS) {
+        setIsEvading(false);
+        // Landed completely, force idle state at the new location
+        forceIdleSingle(activeUav.id, uavLat, uavLng);
+      }
+    }
+  }, [tick, isEvading, activeUav.id, forceIdleSingle, uavLat, uavLng]);
 
   const activeHistory = historyRef.current[selectedMetric] ?? [];
   const activeMeta    = metricMeta[selectedMetric];
@@ -403,15 +441,30 @@ export function Dashboard() {
     setHoverPoint({ idx: clamped, x: toX(clamped), y: toY(activeHistory[clamped]), value: activeHistory[clamped] });
   };
 
-  // Remove the duplicate battery const below (already declared above)
   const wind = 12 + (tick % 4);
   const heading = (tick * 8) % 360;
 
-  // Mock Storm Cell: live position drifts with tick, time offset shifts it further along path
-  const stormBaseLat = baseLat + 0.0121;
-  const stormBaseLng = baseLng - 0.0134;
-  const stormLat = stormBaseLat - (tick * 0.00014) - (timeOffset * 0.008);
-  const stormLng = stormBaseLng + (tick * 0.00016) + (timeOffset * 0.008);
+  // Scenario switcher — resets all volatile storm/battery state so demo is clean
+  const applyScenario = (s: ScenarioId) => {
+    stormAlertFiredRef.current = false;
+    batteryAlertFiredRef.current = false;
+    dashboardState.stormAlertFired = false;
+    dashboardState.batteryAlertFired = false;
+    dashboardState.activeScenario = s;
+    setStormAlertOpen(false);
+    setBatteryAlertOpen(false);
+    setStormRecommendation(null);
+    setStormEtaSeconds(0);
+    setIsEvading(false);
+    scenarioStartTickRef.current = tick; // snapshot current tick so storm always starts at correct offset
+    setActiveScenario(s);
+  };
+  // Mock Storm Cell — offset from base, drifting only since scenario activation (not global tick)
+  const tickSinceScenario = tick - scenarioStartTickRef.current;
+  const stormBaseLat = baseLat + stormOffLat;
+  const stormBaseLng = baseLng + stormOffLng;
+  const stormLat = stormBaseLat - (tickSinceScenario * 0.00014 * stormSpdMult) - (timeOffset * 0.008);
+  const stormLng = stormBaseLng + (tickSinceScenario * 0.00016 * stormSpdMult) + (timeOffset * 0.008);
 
   // Labels for time slider ticks
   const now = new Date();
@@ -449,27 +502,58 @@ export function Dashboard() {
             <span>Live telemetry</span>
           </p>
         </div>
-        <div className="flex items-center gap-3 self-start sm:self-auto">
-          <Link
-            to="/control"
-            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-secondary/60 px-3 py-1.5 rounded-full border border-border transition-colors"
-          >
-            <Plane className="h-3.5 w-3.5" /> Switch UAV
-          </Link>
-          <div className="flex items-center gap-2 text-sm bg-card/50 px-3 py-1.5 rounded-full border border-border">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="hidden sm:flex items-center gap-2 text-sm bg-card/50 px-3 py-1.5 rounded-full border border-border">
             <span className={`h-2.5 w-2.5 rounded-full animate-pulse ${
               activeUav.status === "running" ? "bg-[oklch(var(--success))]" :
               activeUav.status === "landing" ? "bg-destructive" : "bg-muted-foreground"
             }`} />
-            <span className="text-foreground font-medium">
+            <span className="text-foreground font-medium text-xs">
               {activeUav.status === "running" ? "In Flight" : activeUav.status === "landing" ? "Landing" : "Grounded"}
             </span>
           </div>
+
+          <Button variant="outline" className="hidden sm:flex border-border" asChild>
+            <Link to="/control">
+              <Radio className="mr-2 h-4 w-4 text-primary" /> Switch UAV
+            </Link>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="border-border hidden sm:flex text-amber-500 hover:text-amber-400">
+                <TriangleAlert className="mr-2 h-4 w-4" /> Demo Scenarios
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-background border-border shadow-xl">
+              <DropdownMenuItem onClick={() => applyScenario("default")} className="cursor-pointer text-xs font-medium focus:bg-secondary">
+                <LocateFixed className="mr-2 h-4 w-4 text-primary" /> Reset to Default
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => applyScenario("rth")} className="cursor-pointer text-xs font-medium focus:bg-secondary">
+                <Home className="mr-2 h-4 w-4 text-primary" /> Scenario 1: Safe RTH
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => applyScenario("land")} className="cursor-pointer text-xs font-medium focus:bg-secondary">
+                <ArrowDownToLine className="mr-2 h-4 w-4 text-amber-500" /> Scenario 2: Emergency Land
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => applyScenario("evade")} className="cursor-pointer text-xs font-medium focus:bg-secondary">
+                <Plane className="mr-2 h-4 w-4 text-destructive" /> Scenario 3: Evade & Land
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => applyScenario("battery")} className="cursor-pointer text-xs font-medium focus:bg-secondary">
+                <Battery className="mr-2 h-4 w-4 text-destructive" /> Scenario 4: Critical Battery
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button variant="outline" className="sm:hidden flex-1 border-border" asChild>
+            <Link to="/control">
+              <Radio className="mr-2 h-4 w-4 text-primary" /> UAVs
+            </Link>
+          </Button>
         </div>
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={Battery} label="Battery" value={battery} unit="%" tone={battery < 20 ? "danger" : "success"} tooltip="Current power reserves. Return to base if below 20%." />
+        <StatCard icon={Battery} label="Battery" value={battery} unit="%" tone={battery <= 20 ? "danger" : battery <= 50 ? "warning" : "success"} tooltip="Current power reserves. Return to base if below 20%." />
         <StatCard icon={MountainSnow} label="Altitude" value={altitude} unit="m" tooltip="Distance above ground level. Max allowed 150m." />
         <StatCard icon={Gauge} label="Speed" value={speed} unit="km/h" tooltip="Current ground speed." />
         <StatCard icon={Wind} label="Wind" value={wind} unit="km/h" tone={wind > 20 ? "warning" : "default"} tooltip="Local wind speed. >20km/h triggers warnings." />
@@ -484,19 +568,19 @@ export function Dashboard() {
             <p className="text-xs text-muted-foreground">All critical actions require confirmation before execution.</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-col sm:flex-row items-center w-full sm:w-auto gap-3 shrink-0">
           <Button
             onClick={() => setConfirmRTH(true)}
             disabled={activeUav.status !== "running"}
             variant="outline"
-            className="h-10 font-bold border-border bg-secondary text-foreground hover:bg-secondary/70 gap-2"
+            className="w-full sm:w-auto h-10 font-bold border-border bg-secondary text-foreground hover:bg-secondary/70 gap-2"
           >
             <Home className="h-4 w-4" /> Return to Base
           </Button>
           <Button
             onClick={() => setConfirmEmergency(true)}
             disabled={activeUav.status === "idle"}
-            className="h-10 font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
+            className="w-full sm:w-auto h-10 font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
             style={{ boxShadow: activeUav.status === "idle" ? "none" : "0 4px 20px -4px oklch(0.62 0.24 25 / 0.6)" }}
           >
             <Siren className="h-4 w-4" /> Emergency Land
@@ -537,7 +621,7 @@ export function Dashboard() {
                 />
               )}
 
-              {mapMode === "weather" && (
+              {mapMode === "weather" && activeScenario !== "battery" && (
                 <>
                   <Circle center={[stormLat, stormLng]} pathOptions={{ color: 'transparent', fillColor: '#ef4444', fillOpacity: stormOpacity }} radius={stormRadius} />
                   <Circle center={[stormLat + 0.001, stormLng - 0.001]} pathOptions={{ color: 'transparent', fillColor: '#eab308', fillOpacity: stormOpacity * 0.8 }} radius={stormRadius * 1.5} />
@@ -545,8 +629,8 @@ export function Dashboard() {
                   <Marker position={[stormLat, stormLng]} icon={stormIcon}>
                     <Popup className="text-xs">
                       <strong className="text-destructive">Severe Thunderstorm</strong><br />
-                      Moving SE at 55km/h<br />
-                      High wind sheer detected.
+                      Moving SE at {stormLabelKmh}km/h<br />
+                      High wind shear detected.
                     </Popup>
                   </Marker>
                 </>
@@ -591,6 +675,16 @@ export function Dashboard() {
                     <div className="w-3 h-3 rounded-full bg-green-500 opacity-80" /> Light Rain
                   </div>
                 </div>
+                {/* Recenter button in weather mode — placed here to avoid z-index issues */}
+                <button
+                  onClick={() => {
+                    // Trigger the internal Leaflet recenter via a custom event
+                    window.dispatchEvent(new CustomEvent("aero:recenter"));
+                  }}
+                  className="mt-3 w-full flex items-center justify-center gap-1.5 text-xs font-medium text-foreground bg-secondary border border-border rounded-md px-3 py-1.5 hover:bg-secondary/80 transition-colors"
+                >
+                  <LocateFixed className="h-3.5 w-3.5" /> Recenter View
+                </button>
               </div>
             )}
 
@@ -719,7 +813,7 @@ export function Dashboard() {
         </h3>
         <div className="flex flex-col lg:flex-row gap-5">
           {/* Metric tiles */}
-          <div className="flex lg:flex-col gap-3 lg:w-44 shrink-0">
+          <div className="flex overflow-x-auto pb-2 lg:pb-0 lg:flex-col gap-3 lg:w-44 shrink-0 -mx-5 px-5 lg:mx-0 lg:px-0">
             {[
               { label: "Temperature", value: `${temperature}°C`,   icon: Thermometer, color: temperature > 35 ? "#ef4444" : "#f97316",  sub: temperature > 35 ? "High" : "Moderate" },
               { label: "Humidity",    value: `${humidity}%`,       icon: Droplets,    color: humidity > 70 ? "#3b82f6" : "#22d3ee",     sub: humidity > 70 ? "Humid" : "Comfortable" },
@@ -733,7 +827,7 @@ export function Dashboard() {
                   key={item.label}
                   onClick={() => setSelectedMetric(item.label)}
                   className={`flex items-center gap-3 lg:flex-row rounded-xl px-3 py-2.5 text-left transition-all cursor-pointer border ${
-                    active ? 'border-primary/60 bg-primary/10' : 'border-border bg-secondary/40 hover:bg-secondary/70'
+                    active ? 'border-primary/60 bg-primary/10' : 'border-border bg-secondary hover:bg-secondary/70'
                   }`}
                 >
                   <item.icon style={{ color: item.color }} className="h-4 w-4 shrink-0" />
@@ -748,7 +842,7 @@ export function Dashboard() {
           </div>
 
           {/* Live Chart */}
-          <div className="flex-1 bg-secondary/30 rounded-xl p-4 flex flex-col">
+          <div className="flex-1 bg-secondary/50 rounded-xl p-4 flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-semibold text-foreground">{selectedMetric} — Last 1 min</span>
               <span className="text-xs text-muted-foreground">Live • 1.5s interval • Click line to inspect</span>
@@ -854,6 +948,7 @@ export function Dashboard() {
               <span className="block text-muted-foreground">
                 Heavy rain radius will reach UAV in approximately{" "}
                 <span className="text-amber-400 font-bold">{stormEtaSeconds}s</span>.
+                {" "}Storm moving at <span className="text-amber-400 font-bold">{stormLabelKmh} km/h</span>.
               </span>
               {stormRecommendation === "rth" && (
                 <span className="block mt-2 text-sm bg-primary/10 border border-primary/30 rounded-lg px-3 py-2 text-primary font-medium">
@@ -876,7 +971,7 @@ export function Dashboard() {
             <Button
               variant="outline"
               onClick={() => setStormAlertOpen(false)}
-              className="flex-1 border-border bg-secondary text-foreground hover:bg-secondary/70"
+              className="flex-1 border-border bg-card text-foreground hover:bg-muted"
             >
               Dismiss (Fly Manually)
             </Button>
@@ -1054,19 +1149,30 @@ export function Dashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
 
+
 function RecenterButton({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
+  const flyHome = () => map.flyTo(center, zoom, { animate: true, duration: 1.5 });
+
+  // Listen for the custom event fired by the external weather-mode recenter button
+  useEffect(() => {
+    window.addEventListener("aero:recenter", flyHome);
+    return () => window.removeEventListener("aero:recenter", flyHome);
+  }, [center, zoom]);
+
   return (
     <button
-      onClick={() => map.flyTo(center, zoom, { animate: true, duration: 1.5 })}
-      className="absolute bottom-16 right-3 z-10 bg-background/90 backdrop-blur border border-border rounded-md p-2 shadow-sm text-foreground hover:bg-secondary transition-colors"
-      title="Recenter Map"
+      onClick={flyHome}
+      style={{ position: "absolute", bottom: 70, right: 10, zIndex: 999 }}
+      className="leaflet-control bg-background/95 backdrop-blur border border-border rounded-lg p-2 shadow-md text-foreground hover:bg-secondary transition-colors flex items-center gap-1.5 text-xs font-medium"
+      title="Reset map view"
     >
-      <LocateFixed className="h-4 w-4" />
+      <LocateFixed className="h-4 w-4" /> Recenter
     </button>
   );
 }
