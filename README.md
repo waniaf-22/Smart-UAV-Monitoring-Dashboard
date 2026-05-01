@@ -1,6 +1,6 @@
 # Smart UAV Monitoring Dashboard
 
-A high-fidelity Figma prototype for a ground control station (GCS) interface designed to monitor unmanned aerial vehicles (UAVs) in real time — built for the Advanced HCI course at NUCES FAST.
+A high-fidelity Figma prototype for a ground control station (GCS) interface designed to monitor unmanned aerial vehicles (UAVs) in real time — built for the HCI course at NUCES FAST.
 
 ![Figma](https://img.shields.io/badge/Tool-Figma-blue)
 ![HCI](https://img.shields.io/badge/Course-Advanced%20HCI-purple)
@@ -17,12 +17,8 @@ The design was evaluated against **Nielsen's 10 Usability Heuristics** and **Shn
 ---
 
 ## Team
-
-| Name | Student ID |
-|------|------------|
-| Wania Fatima | 23k-0646 |
-| Sameer Rajani | 23i-0760 |
-
+Wania Fatima
+Sameer Rajani
 ---
 
 ## Live Prototype
@@ -82,4 +78,4 @@ AHCI-PROJECT/
 
 ## Course
 
-Advanced Human-Computer Interaction · NUCES FAST University · Spring 2025
+Aapplied Human-Computer Interaction · NUCES FAST University · Spring 2026
