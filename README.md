@@ -17,7 +17,7 @@ The design was evaluated against **Nielsen's 10 Usability Heuristics** and **Shn
 ---
 
 ## Team
-Wania Fatima
+Wania Fatima & 
 Sameer Rajani
 ---
 
